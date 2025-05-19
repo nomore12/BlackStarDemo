@@ -11,3 +11,72 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+@font-face {
+  font-family: 'Danjo'; /* MUI 테마에서 사용할 폰트 이름 */
+  src: local('Danjo'), /* 사용자의 로컬 시스템에 폰트가 이미 설치되어 있는지 확인 (선택 사항) */
+       /* local('My Custom Font Name'), */ /* 실제 폰트 이름으로도 확인 */
+       url('/src/assets/fonts/Danjo-bold-Regular.woff') format('woff'); /* WOFF 포맷 로드 (public 폴더 내 파일 참조) */
+       /* url('Danjo-bold-Regular.woff2') format('woff2'); */  /* WOFF2 파일이 있다면 이 줄의 주석을 해제하세요 */
+  font-weight: bold; /* 폰트 파일이 bold 굵기이므로 'bold'로 설정 */
+  font-style: normal;  /* 해당 폰트 파일의 스타일 (normal, italic 등) */
+  /* unicode-range: U+AC00-D7A3; */ /* 만약 특정 유니코드 범위(예: 한글)에만 적용하고 싶다면 */
+}
+
+/* Hahmlet Fonts */
+@font-face {
+  font-family: 'Hahmlet';
+  src: local('Hahmlet Thin'), local('Hahmlet-Thin'),
+       url('/src/assets/fonts/Hahmlet-Thin.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hahmlet';
+  src: local('Hahmlet Light'), local('Hahmlet-Light'),
+       url('/src/assets/fonts/Hahmlet-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hahmlet';
+  src: local('Hahmlet Regular'), local('Hahmlet-Regular'),
+       url('/src/assets/fonts/Hahmlet-Regular.woff2') format('woff2');
+  font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hahmlet';
+  src: local('Hahmlet Medium'), local('Hahmlet-Medium'),
+       url('/src/assets/fonts/Hahmlet-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hahmlet';
+  src: local('Hahmlet SemiBold'), local('Hahmlet-SemiBold'),
+       url('/src/assets/fonts/Hahmlet-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hahmlet';
+  src: local('Hahmlet Bold'), local('Hahmlet-Bold'),
+       url('/src/assets/fonts/Hahmlet-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hahmlet';
+  src: local('Hahmlet Black'), local('Hahmlet-Black'),
+       url('/src/assets/fonts/Hahmlet-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+}
+

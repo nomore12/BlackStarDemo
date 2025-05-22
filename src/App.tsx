@@ -6,6 +6,7 @@ import './App.css';
 import theme from './Styles/Theme';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from './routes/Routes';
+import { PageTransitionProvider } from './contexts/PageTransitionContext';
 
 function App() {
   return (
@@ -24,17 +25,21 @@ function App() {
       >
         <div
           style={{
-            border: '1px solid white',
+            border: '1px solid #626060',
+            backgroundColor: '#282d29',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             width: '800px',
             height: '600px',
+            position: 'relative',
           }}
         >
           <Router>
-            <AppRoutes />
+            <PageTransitionProvider>
+              <AppRoutes />
+            </PageTransitionProvider>
           </Router>
         </div>
       </div>

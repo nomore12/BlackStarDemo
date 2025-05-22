@@ -3,7 +3,7 @@ import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import './App.css';
-import theme from './Styles/Theme';
+import theme from './styles/Theme';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from './routes/Routes';
 import { PageTransitionProvider } from './contexts/PageTransitionContext';

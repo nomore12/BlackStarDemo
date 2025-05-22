@@ -14,7 +14,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import '../App.css';
-import theme from '../styles/Theme';
+import theme from '../Styles/Theme';
 
 // 스타일링된 컨테이너
 const StyledContainer = styled('div')(({ theme }) => ({

@@ -1,4 +1,3 @@
-// src/Styles/Theme.ts
 import { createTheme } from '@mui/material/styles';
 
 // '검은 별 아래에서' 다크 모드 테마 (전체 버전)
@@ -31,22 +30,16 @@ const theme = createTheme({
     },
     background: {
       default: '#0a0a0a', // 거의 검은색에 가까운 아주 어두운 회색 (전체 배경)
-      paper: '#1c1c1c',   // 컴포넌트 배경 (카드, 다이얼로그 등), default보다 약간 밝지만 어둡게
+      paper: '#1c1c1c', // 컴포넌트 배경 (카드, 다이얼로그 등), default보다 약간 밝지만 어둡게
     },
     text: {
-      primary: '#c5c5c5',   // 밝은 회색 (주요 텍스트, 완전한 흰색보다 부드러움)
+      primary: '#c5c5c5', // 밝은 회색 (주요 텍스트, 완전한 흰색보다 부드러움)
       secondary: '#8e8e8e', // 중간 회색 (보조 텍스트, 설명 등)
-      disabled: '#5e5e5e',  // 비활성화된 텍스트/컴포넌트
-    }
+      disabled: '#5e5e5e', // 비활성화된 텍스트/컴포넌트
+    },
   },
   typography: {
-    fontFamily: [
-          'Danjo',
-        'Hahmlet',
-      'Roboto',
-      'Arial',
-      'sans-serif'
-    ].join(','),
+    fontFamily: ['Danjo', 'Hahmlet', 'Roboto', 'Arial', 'sans-serif'].join(','),
     h1: { fontWeight: 700, fontSize: '2.75rem', color: '#d0d0d0' },
     h2: { fontWeight: 700, fontSize: '2.25rem', color: '#c8c8c8' },
     h3: { fontWeight: 700, fontSize: '1.75rem', color: '#c0c0c0' },
@@ -61,7 +54,8 @@ const theme = createTheme({
       lineHeight: 1.5,
       color: '#8e8e8e', // 보조 본문 텍스트
     },
-    button: { // 버튼 텍스트 스타일
+    button: {
+      // 버튼 텍스트 스타일
       fontWeight: 600,
       letterSpacing: '0.05em',
       textTransform: 'none', // 버튼 텍스트 기본 대문자화 방지 (선호에 따라)
@@ -79,12 +73,14 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          transition: 'background-color 0.1s ease-out, border-color 0.1s ease-out, color 0.1s ease-out', // 부드러운 색상 전환 효과
+          transition:
+            'background-color 0.1s ease-out, border-color 0.1s ease-out, color 0.1s ease-out', // 부드러운 색상 전환 효과
           borderRadius: '4px', // 버튼 모서리 약간 둥글게 (선택 사항)
-          '&:focus-visible': { // 키보드 등으로 포커스 시 명확한 아웃라인 (접근성)
+          '&:focus-visible': {
+            // 키보드 등으로 포커스 시 명확한 아웃라인 (접근성)
             outline: `2px solid #6fc3df`, // 포커스 시 아웃라인 색상 (예시: 밝은 파랑, 테마에 맞게 조정 가능)
             outlineOffset: '2px',
-          }
+          },
         },
         containedPrimary: {
           backgroundColor: '#a88b5a', // 기본 배경색 명시
@@ -92,12 +88,14 @@ const theme = createTheme({
           '&:hover': {
             backgroundColor: '#8a6f43', // 호버 시 약간 더 어두운 primary
           },
-          '&:active': { // 클릭하고 있는 동안 (누르고 있는 상태)
+          '&:active': {
+            // 클릭하고 있는 동안 (누르고 있는 상태)
             backgroundColor: '#705a30', // primary를 더 어둡게
           },
-          '&:focus': { // 마우스 클릭 후에도 포커스가 남아있을 때의 스타일
+          '&:focus': {
+            // 마우스 클릭 후에도 포커스가 남아있을 때의 스타일
             backgroundColor: '#a88b5a', // 클릭 후 포커스 시 다시 원래 primary.main 색상으로
-          }
+          },
         },
         containedSecondary: {
           backgroundColor: '#4a6b7c',
@@ -110,7 +108,7 @@ const theme = createTheme({
           },
           '&:focus': {
             backgroundColor: '#4a6b7c',
-          }
+          },
         },
         outlinedPrimary: {
           borderColor: '#a88b5a',
@@ -128,7 +126,8 @@ const theme = createTheme({
             backgroundColor: 'transparent',
           },
         },
-        outlinedSecondary: { // secondary outlined 버튼 추가
+        outlinedSecondary: {
+          // secondary outlined 버튼 추가
           borderColor: '#4a6b7c',
           color: '#4a6b7c',
           '&:hover': {
@@ -156,7 +155,8 @@ const theme = createTheme({
             backgroundColor: 'transparent',
           },
         },
-        textSecondary: { // secondary text 버튼 추가
+        textSecondary: {
+          // secondary text 버튼 추가
           color: '#4a6b7c',
           '&:hover': {
             backgroundColor: 'rgba(74, 107, 124, 0.08)',
@@ -167,8 +167,8 @@ const theme = createTheme({
           '&:focus': {
             backgroundColor: 'transparent',
           },
-        }
-      }
+        },
+      },
     },
     MuiPaper: {
       styleOverrides: {
@@ -176,45 +176,62 @@ const theme = createTheme({
           backgroundImage: 'none', // 다크모드에서 불필요한 paper 배경 이미지 제거 (필요시)
           border: `1px solid ${'#333333'}`, // 종이 컴포넌트에 희미한 테두리 (선택 사항, 색상 조정)
           padding: '16px', // Paper 컴포넌트에 기본 패딩 (선택 사항)
-        }
-      }
+        },
+      },
     },
-    MuiAppBar: { // 예시: 앱바 스타일
+    MuiAppBar: {
+      // 예시: 앱바 스타일
       styleOverrides: {
         root: {
           backgroundColor: '#1c1c1c', // paper 색상과 유사하게 또는 더 어둡게
           backgroundImage: 'none',
-          boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)', // 그림자 추가 (선택 사항)
-        }
-      }
+          boxShadow:
+            '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)', // 그림자 추가 (선택 사항)
+        },
+      },
     },
-    MuiTooltip: { // 예시: 툴팁 스타일
-        styleOverrides: {
-            tooltip: {
-                backgroundColor: '#2e2e2e', // 툴팁 배경색
-                color: '#c5c5c5', // 툴팁 텍스트색
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-            },
-            arrow: {
-                color: '#2e2e2e',
-            }
-        }
-    },
-    MuiAlert: { // 예시: Alert 컴포넌트 스타일
+    MuiTooltip: {
+      // 예시: 툴팁 스타일
       styleOverrides: {
-        root: { // 모든 Alert 공통
+        tooltip: {
+          backgroundColor: '#2e2e2e', // 툴팁 배경색
+          color: '#c5c5c5', // 툴팁 텍스트색
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+        },
+        arrow: {
+          color: '#2e2e2e',
+        },
+      },
+    },
+    MuiAlert: {
+      // 예시: Alert 컴포넌트 스타일
+      styleOverrides: {
+        root: {
+          // 모든 Alert 공통
           borderRadius: '4px',
           borderWidth: '1px',
           borderStyle: 'solid',
         },
-        standardError: { borderColor: '#c62828', backgroundColor: 'rgba(198, 40, 40, 0.1)' },
-        standardWarning: { borderColor: '#b07d3a', backgroundColor: 'rgba(176, 125, 58, 0.1)' },
-        standardInfo: { borderColor: '#546e7a', backgroundColor: 'rgba(84, 110, 122, 0.1)' },
-        standardSuccess: { borderColor: '#38703a', backgroundColor: 'rgba(56, 112, 58, 0.1)' },
-      }
-    }
+        standardError: {
+          borderColor: '#c62828',
+          backgroundColor: 'rgba(198, 40, 40, 0.1)',
+        },
+        standardWarning: {
+          borderColor: '#b07d3a',
+          backgroundColor: 'rgba(176, 125, 58, 0.1)',
+        },
+        standardInfo: {
+          borderColor: '#546e7a',
+          backgroundColor: 'rgba(84, 110, 122, 0.1)',
+        },
+        standardSuccess: {
+          borderColor: '#38703a',
+          backgroundColor: 'rgba(56, 112, 58, 0.1)',
+        },
+      },
+    },
     // ... 다른 MUI 컴포넌트들에 대한 스타일 오버라이드 추가 가능 ...
-  }
+  },
 });
 
 export default theme;

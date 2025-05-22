@@ -1,14 +1,13 @@
 // src/App.tsx
 import React from 'react';
-import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider, styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu'; // 예시 아이콘
+import MenuIcon from '@mui/icons-material/Menu';
 import Tooltip from '@mui/material/Tooltip';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
@@ -16,8 +15,6 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import '../App.css';
 import theme from '../styles/Theme';
-import { BrowserRouter as Router } from 'react-router-dom';
-import AppRoutes from '../routes/Routes';
 
 // 스타일링된 컨테이너
 const StyledContainer = styled('div')(({ theme }) => ({

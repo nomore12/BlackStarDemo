@@ -59,6 +59,9 @@ const CharacterSelect: React.FC = () => {
   const [selectedCharacterForInfo, setSelectedCharacterForInfo] = useState<
     string | null
   >(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
+    null
+  );
 
   const handleOpenInfoModal = (characterId: string) => {
     setSelectedCharacterForInfo(characterId);
@@ -182,12 +185,71 @@ const CharacterSelect: React.FC = () => {
               color="primary"
               fullWidth
               sx={{ mt: 'auto' }}
+              onClick={() => setSelectedCharacter(character.id)}
             >
               선택하기
             </Button>
           </Box>
         ))}
       </Box>
+      <Dialog
+        open={!!selectedCharacter}
+        onClose={() => setSelectedCharacter(null)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: '#1e1e1e',
+            color: '#c0c0c0',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontFamily: 'Danjo',
+            color: '#e0e0e0',
+            borderBottom: '1px solid #444',
+          }}
+        >
+          캐릭터 선택 확인
+        </DialogTitle>
+        <DialogContent sx={{ paddingTop: '20px !important' }}>
+          <Typography
+            sx={{
+              fontFamily: 'Hahmlet',
+              fontSize: '1rem',
+              textAlign: 'center',
+            }}
+          >
+            정말{' '}
+            {selectedCharacter
+              ? charactersData.find((char) => char.id === selectedCharacter)
+                  ?.name
+              : ''}
+            를 선택하시겠습니까?
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{ borderTop: '1px solid #444', padding: '12px 24px' }}
+        >
+          <Button
+            onClick={() => setSelectedCharacter(null)}
+            color="inherit"
+            variant="outlined"
+            sx={{ borderColor: '#777' }}
+          >
+            취소
+          </Button>
+          <Button
+            onClick={() => setSelectedCharacter(null)}
+            color="inherit"
+            variant="outlined"
+            sx={{ borderColor: '#777' }}
+          >
+            시작하기
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={!!selectedCharacterForInfo && !!selectedCharacterData}

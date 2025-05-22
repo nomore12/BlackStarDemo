@@ -1,8 +1,8 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import MainMenu from '../Scenes/MainMenu';
-import CharacterSelect from '../Scenes/CharacterSelect';
-import UiTest from '../Scenes/UiTest';
+import MainMenu from '../scenes/MainMenu';
+import CharacterSelect from '../scenes/CharacterSelect';
+import UiTest from '../scenes/UiTest';
 const AppRoutes: React.FC = () => {
   return (
     <Routes>

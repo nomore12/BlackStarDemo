@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { useGameStore } from '../store/characterStore';
 import { usePageTransition } from '../contexts/PageTransitionContext';
+import { useSceneStore } from '../store/sceneStore';
 
 interface Character {
   id: string;
@@ -67,6 +68,8 @@ const CharacterSelect: React.FC = () => {
     'scholar' | 'explorer' | null
   >(null);
 
+  const { initializeRunScenes } = useSceneStore();
+
   const handleOpenInfoModal = (characterId: string) => {
     setSelectedCharacterForInfo(characterId);
   };
@@ -77,6 +80,7 @@ const CharacterSelect: React.FC = () => {
 
   const handleStartGame = (characterId: 'scholar' | 'explorer' | null) => {
     if (!characterId) return;
+    initializeRunScenes(characterId);
     selectCharacter(characterId);
     startFadeOutToBlack('/introduction', 1500);
   };

@@ -1,7 +1,18 @@
 import React from 'react';
+import { useSceneStore } from '../../store/sceneStore';
+import { usePageTransition } from '../../contexts/PageTransitionContext';
+const SecondHalf02: React.FC = () => {
+  const { getNextSceneUrl } = useSceneStore();
+  const { startFadeOutToBlack } = usePageTransition();
 
-const SecondHalf02 = () => {
-  return <div>SecondHalf02</div>;
+  return (
+    <div>
+      <div>SecondHalf02</div>
+      <button onClick={() => startFadeOutToBlack(getNextSceneUrl(), 1500)}>
+        Next Scene
+      </button>
+    </div>
+  );
 };
 
 export default SecondHalf02;

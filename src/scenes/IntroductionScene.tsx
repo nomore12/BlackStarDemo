@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/characterStore'; // Zustand 스토어 임포트
 import { usePageTransition } from '../contexts/PageTransitionContext'; // 페이지 전환 훅 (페이드아웃용)
+import { useSceneStore } from '../store/sceneStore';
 
 const scholarText = [
   '미스카토닉 대학의 고문서 서고… 이 희미한 가스등 아래서, 나는 마침내 그것을 발견했다. 낡은 양피지 한 장. 존경하는 에드워드 선배님께서 실종 직전까지 매달리셨던 바로 그 연구였다. 뉴잉글랜드 외곽, 의문의 블랙우드 저택… 모든 단서가 그곳을 가리키고 있었다.',
@@ -35,6 +36,8 @@ const IntroductionScene = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [currentDisplayedText, setCurrentDisplayedText] = useState('');
+
+  const { getNextSceneUrl } = useSceneStore();
 
   const textsToDisplay =
     selectedCharacter?.id === 'scholar' ? scholarText : explorerText;
@@ -86,7 +89,7 @@ const IntroductionScene = () => {
 
   const handleCloseModalAndProceed = () => {
     setIsModalOpen(false);
-    startFadeOutToBlack('/first-half-01', 1500);
+    startFadeOutToBlack(getNextSceneUrl(), 1500);
   };
 
   if (!selectedCharacter) {

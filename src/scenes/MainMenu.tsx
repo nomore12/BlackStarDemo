@@ -1,4 +1,4 @@
-import { Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import React from 'react';
 // useNavigate는 이제 PageTransitionContext 내부의 훅에서 사용됩니다.
 // import { useNavigate } from 'react-router-dom';
@@ -23,10 +23,25 @@ const MainMenu: React.FC = () => {
         height: '100%', // 부모 컨테이너에 꽉 차도록
       }}
     >
+      <Box
+        sx={{
+          width: '100%',
+          height: '598px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <img
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          src="images/title5.png"
+          alt="logo"
+        />
+      </Box>
       <Typography
         sx={{
           position: 'absolute',
-          top: 120,
+          top: 150,
           left: '50%',
           transform: 'translateX(-50%)',
         }}
@@ -39,11 +54,11 @@ const MainMenu: React.FC = () => {
           width: 320,
           fontSize: 24,
           position: 'absolute',
-          top: 400,
+          top: 500,
           left: '50%',
           transform: 'translateX(-50%)',
         }}
-        variant="outlined"
+        variant="text"
         color="primary"
         size="large"
         onClick={handleGameStart} // 수정된 핸들러 연결

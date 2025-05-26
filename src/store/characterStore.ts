@@ -1,5 +1,7 @@
 // store/characterStore.ts (또는 유사한 파일)
 
+import { create } from 'zustand';
+
 // 스킬 정보를 위한 인터페이스 정의
 export interface Skill {
   id: string; // 스킬 고유 ID (로직 연결용, 예: 'analytical_thinking')
@@ -93,36 +95,36 @@ export interface GameState {
   currentRoomId: string | null;
   // ... 기타 전역 상태 ...
   // 액션 함수들 ...
-  selectCharacter: (characterType: 'scholar' | 'explorer') => void;
+  selectCharacter: (characterType: 'scholar' | 'explorer' | null) => void;
   // ...
 }
 
 // Zustand 스토어 생성 (예시)
 // import create from 'zustand';
 //
-// export const useGameStore = create<GameState>((set) => ({
-//   selectedCharacter: null,
-//   doomGauge: 0,
-//   currentZoneId: null,
-//   currentRoomId: null,
-//   // ... 기타 초기 상태값 ...
-//
-//   selectCharacter: (characterType) => {
-//     let characterData: CharacterState;
-//     if (characterType === 'scholar') {
-//       characterData = initialScholarData;
-//     } else if (characterType === 'explorer') {
-//       characterData = initialExplorerData;
-//     } else {
-//       console.error("Unknown character type:", characterType);
-//       return;
-//     }
-//     set({
-//       selectedCharacter: { ...characterData }, // 객체 복사하여 할당
-//       // 캐릭터별 다른 초기 상태값도 여기서 설정 가능
-//       // currentHP: characterData.currentHP,
-//       // currentSanity: characterData.currentSanity,
-//     });
-//   },
-//   // ... 기타 액션 함수들 ...
-// }));
+export const useGameStore = create<GameState>((set) => ({
+  selectedCharacter: null,
+  doomGauge: 0,
+  currentZoneId: null,
+  currentRoomId: null,
+  // ... 기타 초기 상태값 ...
+
+  selectCharacter: (characterType) => {
+    let characterData: CharacterState;
+    if (characterType === 'scholar') {
+      characterData = initialScholarData;
+    } else if (characterType === 'explorer') {
+      characterData = initialExplorerData;
+    } else {
+      console.error('Unknown character type:', characterType);
+      return;
+    }
+    set({
+      selectedCharacter: { ...characterData }, // 객체 복사하여 할당
+      // 캐릭터별 다른 초기 상태값도 여기서 설정 가능
+      // currentHP: characterData.currentHP,
+      // currentSanity: characterData.currentSanity,
+    });
+  },
+  // ... 기타 액션 함수들 ...
+}));

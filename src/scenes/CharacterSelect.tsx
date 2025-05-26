@@ -9,6 +9,8 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
+import { useGameStore } from '../store/characterStore';
+import { usePageTransition } from '../contexts/PageTransitionContext';
 
 interface Character {
   id: string;
@@ -56,12 +58,14 @@ const charactersData: Character[] = [
 ];
 
 const CharacterSelect: React.FC = () => {
+  const { selectCharacter } = useGameStore();
+  const { startFadeOutToBlack } = usePageTransition();
   const [selectedCharacterForInfo, setSelectedCharacterForInfo] = useState<
     string | null
   >(null);
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
-    null
-  );
+  const [selectedCharacter, setSelectedCharacter] = useState<
+    'scholar' | 'explorer' | null
+  >(null);
 
   const handleOpenInfoModal = (characterId: string) => {
     setSelectedCharacterForInfo(characterId);
@@ -69,6 +73,12 @@ const CharacterSelect: React.FC = () => {
 
   const handleCloseInfoModal = () => {
     setSelectedCharacterForInfo(null);
+  };
+
+  const handleStartGame = (characterId: 'scholar' | 'explorer' | null) => {
+    if (!characterId) return;
+    selectCharacter(characterId);
+    startFadeOutToBlack('/introduction', 1500);
   };
 
   const selectedCharacterData = selectedCharacterForInfo
@@ -185,7 +195,9 @@ const CharacterSelect: React.FC = () => {
               color="primary"
               fullWidth
               sx={{ mt: 'auto' }}
-              onClick={() => setSelectedCharacter(character.id)}
+              onClick={() =>
+                setSelectedCharacter(character.id as 'scholar' | 'explorer')
+              }
             >
               선택하기
             </Button>
@@ -241,7 +253,7 @@ const CharacterSelect: React.FC = () => {
             취소
           </Button>
           <Button
-            onClick={() => setSelectedCharacter(null)}
+            onClick={() => handleStartGame(selectedCharacter)}
             color="inherit"
             variant="outlined"
             sx={{ borderColor: '#777' }}

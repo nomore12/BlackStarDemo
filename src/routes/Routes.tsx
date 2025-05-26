@@ -13,12 +13,14 @@ import {
   FirstHalf07,
   FirstHalf08,
 } from '../scenes/rooms/index';
+import IntroductionScene from '../scenes/IntroductionScene';
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<MainMenu />} />
       <Route path="/character-select" element={<CharacterSelect />} />
+      <Route path="/introduction" element={<IntroductionScene />} />
       <Route path="/ui-test" element={<UiTest />} />
       <Route path="/first-half-01" element={<FirstHalf01 />} />
       <Route path="/first-half-02" element={<FirstHalf02 />} />

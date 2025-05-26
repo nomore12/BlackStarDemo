@@ -1,46 +1,81 @@
-# Getting Started with Create React App
+# React 프로토타입 개발 추천 순서
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+"검은 별 아래에서" 게임의 핵심 재미를 검증하기 위한 React 프로토타입 개발 순서입니다. 핵심은 **"가장 핵심적인 경험부터, 점진적으로, 그리고 자주 테스트하며"** 개발하는 것입니다.
 
-## Available Scripts
+## 1. 전역 상태 관리 (Zustand) 설정 및 캐릭터 선택 기능 완성
 
-In the project directory, you can run:
+- **목표:** 캐릭터를 선택하고, 선택된 캐릭터의 기본 정보(이름, HP, 이성, 기술 등)가 전역 상태에 저장되어 다음 화면(첫 번째 방)으로 전달될 수 있도록 합니다.
+- **세부 작업:**
+  - `store/gameStore.ts` (또는 유사한 이름) 파일 생성 및 Zustand 스토어 기본 설정.
+  - 이전에 논의했던 `CharacterState` 인터페이스 및 `initialScholarData`, `initialExplorerData` 정의.
+  - `selectCharacter` 액션 구현: `CharacterSelect.tsx`의 "선택하기" 버튼 클릭 시 이 액션을 호출하여 선택된 캐릭터 정보를 스토어에 저장.
+  - `MainMenu.tsx`에서 "게임 시작" 버튼 클릭 시 `CharacterSelect.tsx` 화면으로 이동하는 로직 연결 (이미 `usePageTransition` 훅을 사용하고 있으니, 이를 활용).
+  - `CharacterSelect.tsx`의 "선택하기" 버튼 클릭 후, 스토어에 캐릭터 정보가 저장되면 다음 단계인 첫 번째 방 화면으로 이동하는 로직 추가 (역시 `usePageTransition` 활용).
+- **검증:** 캐릭터 선택 시 해당 캐릭터의 초기 데이터(HP, 이성 등)가 스토어에 올바르게 저장되는지 `console.log` 등으로 확인. 선택 후 다음 화면(아직은 빈 `FirstHalf01.tsx`)으로 넘어가는지 확인.
 
-### `npm start`
+## 2. 첫 번째 방 (예: `FirstHalf01.tsx`) 구현 - 핵심 탐험 루프
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **목표:** 하나의 방에서 "상황 인지 → 고유 행동 선택 → 결과 확인 (텍스트 및 상태 변화) → 다음 방 선택지 제시"로 이어지는 핵심 탐험 루프를 구현합니다.
+- **세부 작업 (이전 "React 프로토타입 구현 내용 상세" 참고):**
+  - **화면 구성:**
+    - `StatusBar`: Zustand 스토어에서 현재 캐릭터의 HP, 이성 수치, (선택적) 파멸 게이지를 가져와 표시.
+    - `ObjectDisplay`: 해당 방의 고정 오브젝트 정보(이름, 설명 - 하드코딩) 표시. (업로드해주신 "고서가 있는 제단" 이미지 등을 활용)
+    - `EventLogDisplay`: 상황 묘사, 선택 결과 텍스트 표시.
+    - `ActionButtons`: 해당 오브젝트에 대한 '고유 행동' 선택지 버튼 (2~3개) 표시.
+  - **데이터 및 로직 (이 방 컴포넌트 또는 `gameStore.ts` 액션):**
+    - `FirstHalf01.tsx`에 필요한 고정 오브젝트 정보, 고유 행동 목록 및 각 행동의 결과를 하드코딩합니다. (예: "고서 관찰" 시 이성 -5, 로그 추가 등)
+    - '고유 행동' 버튼 클릭 시 해당 효과(이성 변화, 로그 추가 등)를 Zustand 스토어 액션을 통해 처리하고, UI가 업데이트되도록 합니다.
+    - 방의 이벤트/행동이 모두 끝나면, 다음 방으로 갈 수 있는 선택지(문양 + 간단한 텍스트 힌트, 1~2개)를 버튼 형태로 제시합니다. (클릭 시 `currentRoomId`를 변경하고 다음 방 컴포넌트로 이동하는 로직)
+- **검증:**
+  - 캐릭터 상태(HP, 이성)가 UI에 잘 표시되는가?
+  - 오브젝트 정보와 상황 텍스트가 명확한가?
+  - '고유 행동' 선택 시 결과 텍스트가 잘 나오고, 이성 수치가 의도대로 변하는가?
+  - 다음 방 선택지가 제시되고, 클릭 시 (아직은 비어있을) 다음 방 컴포넌트로 이동하는가?
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 3. 기본 전투 시스템 프로토타입 연동
 
-### `npm test`
+- **목표:** 특정 '고유 행동' 결과로 매우 단순화된 전투에 돌입하고, 그 결과를 경험할 수 있게 합니다.
+- **세부 작업:**
+  - `FirstHalf01.tsx` (또는 다른 방)에서 특정 '고유 행동'을 선택하면 `isInCombat` 상태를 `true`로 변경하고, `CombatScreen.tsx` (가칭) 컴포넌트를 렌더링합니다.
+  - `CombatScreen.tsx`:
+    - 플레이어 HP, 적 HP (고정된 단일 적, HP 하드코딩) 표시.
+    - "공격" 버튼 제공.
+    - 턴 기반으로 플레이어 공격 -> 적 HP 감소 -> 적 자동 공격 -> 플레이어 HP 감소 -> ... 반복. (모든 로직은 매우 단순하게)
+    - 승리/패배 조건 충족 시 `isInCombat`을 `false`로 변경하고, 결과(이성 변화, 아이템 획득 암시 등)를 로그에 추가 후 탐험 화면으로 복귀.
+- **검증:**
+  - 전투 돌입/종료 흐름이 자연스러운가?
+  - 가장 기본적인 공방과 승패 결과가 명확히 전달되는가?
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 4. 두 번째, 세 번째 방 (`FirstHalf02.tsx`, `FirstHalf03.tsx`) 구현 - 핵심 이벤트 포함
 
-### `npm run build`
+- **목표:** 랜덤 방 선택 로직의 기초를 만들고, 고정된 핵심 이벤트(예: 학자의 "고서가 있는 제단" 발견)를 특정 순서에 배치하여 경험하게 합니다.
+- **세부 작업:**
+  - `FirstHalf01.tsx` 클리어 후, 다음 방 선택지 중 하나가 `FirstHalf02.tsx`로, 다른 하나가 `FirstHalf03.tsx`로 이어지도록 (또는 랜덤 선택) 구현합니다.
+  - 만약 학자 캐릭터라면, `FirstHalf03.tsx`(예시)에는 반드시 "고서가 있는 제단" 오브젝트와 관련 '고유 행동'이 등장하도록 고정 이벤트를 만듭니다. 이 행동의 결과는 이후 진행에 영향을 준다는 것을 텍스트로 암시합니다. (예: '키' 아이템 획득 개념 도입 - 스토어에 `hasGrimoireKey: true` 설정)
+  - 각 방은 이전 단계와 유사하게 오브젝트/이벤트 또는 간단한 전투를 포함할 수 있습니다.
+- **검증:**
+  - 다음 방으로의 이동 및 각 방의 고유 콘텐츠 경험이 가능한가?
+  - 고정된 핵심 이벤트가 의도한 순서에 등장하고, 플레이어가 그 중요성을 인지할 수 있는가?
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 5. 랜덤 방 풀 및 진행 로직 기초 구현 (10개 방 진행)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **목표:** 15~20개의 방 컴포넌트 중 일부(예: `FirstHalf01.tsx` ~ `FirstHalf08.tsx`까지 8개)를 만들고, 이들을 랜덤하게(또는 일부 고정 순서 포함) 10개까지 진행하는 기본 로직을 만듭니다.
+- **세부 작업:**
+  - `scenes/rooms/index.ts`에 정의된 방 컴포넌트 목록을 가져옵니다.
+  - 게임 시작 시 또는 구역 시작 시, 이 목록에서 10개의 방 순서를 (일부 고정 이벤트 방 포함하여) 결정하는 로직을 `gameStore.ts` 또는 상위 컴포넌트에 추가합니다.
+  - 각 방 클리어 시, 다음 방 선택지(문양)를 보여주고, 선택에 따라 결정된 다음 방 컴포넌트를 렌더링합니다.
+  - 10번째 방에 도달하면 (또는 그 이전에 특정 조건 만족 시) 구역 클라이맥스 이벤트(텍스트 기반)를 보여주고 프로토타입을 종료하거나 다시 시작할 수 있도록 합니다.
+- **검증:**
+  - 매번 다른 순서로 방이 등장하는가? (랜덤성 확인)
+  - 고정 이벤트 방은 의도한 시점에 잘 나오는가?
+  - 10개의 방을 진행하고 구역이 마무리되는 흐름이 완성되는가?
+  - **이 반복적인 루프가 지루하지 않고 계속 플레이할 동기를 부여하는가?**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+**각 단계별 집중 사항:**
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **UI/UX:** 플레이어가 정보를 쉽게 이해하고, 선택지를 명확히 인지하며, 직관적으로 조작할 수 있도록 합니다. (업로드해주신 이미지 에셋 적극 활용)
+- **핵심 시스템 피드백:** 이성 수치 변화, 파멸 게이지 증가 등이 플레이어에게 명확하게 전달되고, 이것이 다음 선택에 영향을 미치는지 확인합니다.
+- **재미 요소 검증:** "선택의 결과가 궁금하다", "다음 방에는 무엇이 있을까?", "이 위기를 어떻게 해결할까?" 와 같은 감정을 플레이어가 느끼는지 스스로 판단하고, 가능하다면 소수에게 테스트해봅니다.
+- **버그보다는 흐름:** 완벽한 버그 없는 코드보다는, 게임의 핵심 흐름과 재미 요소를 빠르게 테스트하는 데 집중합니다.

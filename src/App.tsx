@@ -46,6 +46,21 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    const handleContextMenu = (event: MouseEvent) => {
+      // REACT_APP_DEBUG_MODE가 'false'일 때 오른쪽 클릭 방지
+      if (process.env.REACT_APP_DEBUG_MODE === 'false') {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, []); // 컴포넌트 마운트 시 한 번만 실행
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />{' '}
@@ -62,7 +77,7 @@ function App() {
       >
         <div
           style={{
-            border: '1px solid #626060',
+            border: '1px solid #0f0f0f',
             backgroundColor: '#282d29',
             display: 'flex',
             flexDirection: 'column',

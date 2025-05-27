@@ -25,6 +25,21 @@ const ScholarRoom: React.FC = () => {
         src="images/room.png"
         alt="manor"
       />
+      <Box
+        sx={{
+          width: 300,
+          height: 300,
+          position: 'absolute',
+          top: 300,
+          left: 250,
+        }}
+      >
+        <img
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          src="images/altar.png"
+          alt="altar"
+        />
+      </Box>
       <Typography
         sx={{
           position: 'absolute',

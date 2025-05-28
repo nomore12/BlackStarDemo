@@ -228,6 +228,14 @@ const ExplorerRoom: React.FC = () => {
               { type: 'customEffect', payload: { effectId: 'CLOSE_MODAL' } },
             ] as RoomOutcome[],
           },
+          {
+            id: 'door_close_effect',
+            buttonText: '문을 열지 않는다.',
+            outcome: {
+              type: 'customEffect',
+              payload: { effectId: 'CLOSE_MODAL' },
+            } as RoomOutcome,
+          },
         ],
       },
       DOOR_CANCEL: {

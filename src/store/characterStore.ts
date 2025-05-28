@@ -1,6 +1,7 @@
 // store/characterStore.ts (또는 유사한 파일)
 
 import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
 // --- 제공해주신 Mutate 관련 인터페이스 정의 ---
 export interface TentacleState {
@@ -55,6 +56,19 @@ export interface CharacterState {
   mutate: MutateState; // 업데이트된 MutateState 타입 사용
 }
 
+// Skill 및 Item 타입 정의 (예시 - 실제 프로젝트에 맞게 수정 필요)
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface Item {
+  id: string;
+  name: string;
+  description: string;
+}
+
 // 초기 데이터 (initialScholarData, initialExplorerData)는 이전과 동일하다고 가정합니다.
 // MutateState 구조에 맞게 초기 데이터의 mutate 부분도 업데이트되어야 합니다.
 // 예시:
@@ -67,11 +81,15 @@ export const initialScholarData: CharacterState = {
   currentSanity: 80,
   maxSanity: 100,
   skills: [
-    /* ...skills... */
+    {
+      id: 'skill_s_1',
+      name: '고대 지식',
+      description: '고대 문헌 해독 능력 증가',
+    },
   ],
   acquiredKeys: [],
   items: [
-    /* ...items... */
+    { id: 'item_s_1', name: '연구 일지', description: '단서 기록용 일지' },
   ],
   attackPower: 5,
   defensePower: 3,
@@ -102,11 +120,20 @@ export const initialExplorerData: CharacterState = {
   currentSanity: 65,
   maxSanity: 100,
   skills: [
-    /* ...skills... */
+    {
+      id: 'skill_e_1',
+      name: '생존 본능',
+      description: '위험 감지 및 회피 능력 향상',
+    },
   ],
   acquiredKeys: [],
   items: [
-    /* ...items... */
+    {
+      id: 'item_e_1',
+      name: '낡은 사진',
+      description:
+        '행방불명된 동생과 함께 찍은 사진. 뒷 면에는 동생이 오빠에게 쓴 글이 있다.',
+    },
   ],
   attackPower: 8,
   defensePower: 5,
@@ -144,169 +171,195 @@ export interface GameState {
   setCharacterMutate: (value: MutateState) => void; // 원래대로 복원
 }
 
-export const useGameStore = create<GameState>((set) => ({
-  selectedCharacter: null,
-  doomGauge: 0,
-  currentRoomId: null,
+export const useGameStore = create<GameState>()(
+  devtools(
+    persist(
+      (set) => ({
+        selectedCharacter: null,
+        doomGauge: 0,
+        currentRoomId: null,
 
-  selectCharacter: (characterType) => {
-    if (characterType === null) {
-      set({ selectedCharacter: null });
-      return;
+        selectCharacter: (characterType) => {
+          if (characterType === null) {
+            set({ selectedCharacter: null });
+            return;
+          }
+          let characterData: CharacterState;
+          if (characterType === 'scholar') {
+            characterData = JSON.parse(JSON.stringify(initialScholarData));
+          } else if (characterType === 'explorer') {
+            characterData = JSON.parse(JSON.stringify(initialExplorerData));
+          } else {
+            console.error('Unknown character type:', characterType);
+            return;
+          }
+          set({
+            selectedCharacter: characterData,
+          });
+        },
+
+        changeDoomGauge: (delta: number) => {
+          set((state) => {
+            const newDoomGauge = Math.max(
+              0,
+              Math.min(100, state.doomGauge + delta)
+            );
+            return { doomGauge: newDoomGauge };
+          });
+        },
+
+        changeCharacterHp: (delta: number) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newHP = Math.max(
+                0,
+                Math.min(
+                  state.selectedCharacter.maxHP,
+                  state.selectedCharacter.currentHP + delta
+                )
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  currentHP: newHP,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        changeCharacterSanity: (delta: number) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newSanity = Math.max(
+                0,
+                Math.min(
+                  state.selectedCharacter.maxSanity,
+                  state.selectedCharacter.currentSanity + delta
+                )
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  currentSanity: newSanity,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        changeCharacterActionPoints: (delta: number) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newAP = Math.max(
+                0,
+                state.selectedCharacter.actionPoints + delta
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  actionPoints: newAP,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        changeCharacterReactionPoints: (delta: number) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newRP = Math.max(
+                0,
+                state.selectedCharacter.reactionPoints + delta
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  reactionPoints: newRP,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        changeCharacterInvestigationPoints: (delta: number) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newVal = Math.max(
+                0,
+                state.selectedCharacter.investigationPoints + delta
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  investigationPoints: newVal,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        changeCharacterObservationPoints: (delta: number) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newVal = Math.max(
+                0,
+                state.selectedCharacter.observationPoints + delta
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  observationPoints: newVal,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        changeCharacterLuckPoints: (delta: number) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newVal = Math.max(
+                0,
+                state.selectedCharacter.luckPoints + delta
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  luckPoints: newVal,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        setCharacterMutate: (value: MutateState) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  mutate: value,
+                },
+              };
+            }
+            return {};
+          });
+        },
+      }),
+      {
+        name: 'blackstar-character-storage',
+      }
+    ),
+    {
+      name: 'GameStore',
     }
-    let characterData: CharacterState;
-    if (characterType === 'scholar') {
-      characterData = initialScholarData;
-    } else if (characterType === 'explorer') {
-      characterData = initialExplorerData;
-    } else {
-      console.error('Unknown character type:', characterType);
-      return;
-    }
-    set({
-      selectedCharacter: { ...characterData },
-    });
-  },
-
-  changeDoomGauge: (delta: number) => {
-    set((state) => {
-      const newDoomGauge = Math.max(0, Math.min(100, state.doomGauge + delta));
-      return { doomGauge: newDoomGauge };
-    });
-  },
-
-  changeCharacterHp: (delta: number) => {
-    set((state) => {
-      if (state.selectedCharacter) {
-        const newHP = Math.max(
-          0,
-          Math.min(
-            state.selectedCharacter.maxHP,
-            state.selectedCharacter.currentHP + delta
-          )
-        );
-        return {
-          selectedCharacter: { ...state.selectedCharacter, currentHP: newHP },
-        };
-      }
-      return {};
-    });
-  },
-
-  changeCharacterSanity: (delta: number) => {
-    set((state) => {
-      if (state.selectedCharacter) {
-        const newSanity = Math.max(
-          0,
-          Math.min(
-            state.selectedCharacter.maxSanity,
-            state.selectedCharacter.currentSanity + delta
-          )
-        );
-        return {
-          selectedCharacter: {
-            ...state.selectedCharacter,
-            currentSanity: newSanity,
-          },
-        };
-      }
-      return {};
-    });
-  },
-
-  changeCharacterActionPoints: (delta: number) => {
-    set((state) => {
-      if (state.selectedCharacter) {
-        const newAP = Math.max(0, state.selectedCharacter.actionPoints + delta);
-        return {
-          selectedCharacter: {
-            ...state.selectedCharacter,
-            actionPoints: newAP,
-          },
-        };
-      }
-      return {};
-    });
-  },
-
-  changeCharacterReactionPoints: (delta: number) => {
-    set((state) => {
-      if (state.selectedCharacter) {
-        const newRP = Math.max(
-          0,
-          state.selectedCharacter.reactionPoints + delta
-        );
-        return {
-          selectedCharacter: {
-            ...state.selectedCharacter,
-            reactionPoints: newRP,
-          },
-        };
-      }
-      return {};
-    });
-  },
-
-  changeCharacterInvestigationPoints: (delta: number) => {
-    set((state) => {
-      if (state.selectedCharacter) {
-        const newVal = Math.max(
-          0,
-          state.selectedCharacter.investigationPoints + delta
-        );
-        return {
-          selectedCharacter: {
-            ...state.selectedCharacter,
-            investigationPoints: newVal,
-          },
-        };
-      }
-      return {};
-    });
-  },
-
-  changeCharacterObservationPoints: (delta: number) => {
-    set((state) => {
-      if (state.selectedCharacter) {
-        const newVal = Math.max(
-          0,
-          state.selectedCharacter.observationPoints + delta
-        );
-        return {
-          selectedCharacter: {
-            ...state.selectedCharacter,
-            observationPoints: newVal,
-          },
-        };
-      }
-      return {};
-    });
-  },
-
-  changeCharacterLuckPoints: (delta: number) => {
-    set((state) => {
-      if (state.selectedCharacter) {
-        const newVal = Math.max(0, state.selectedCharacter.luckPoints + delta);
-        return {
-          selectedCharacter: { ...state.selectedCharacter, luckPoints: newVal },
-        };
-      }
-      return {};
-    });
-  },
-
-  setCharacterMutate: (value: MutateState) => {
-    // 👈 원래대로 복원된 setCharacterMutate
-    set((state) => {
-      if (state.selectedCharacter) {
-        return {
-          selectedCharacter: {
-            ...state.selectedCharacter,
-            mutate: value, // 전달받은 MutateState 값으로 전체를 교체
-          },
-        };
-      }
-      return {};
-    });
-  },
-}));
+  )
+);

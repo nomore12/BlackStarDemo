@@ -37,7 +37,7 @@ const CHARACTER_FIXED_SCENES: Record<CharacterType, string> = {
 const LAST_STAGE_SCENE_ID = 'last-stage-room';
 
 // SceneStore의 상태 인터페이스
-interface SceneStoreState {
+export interface SceneStoreState {
   currentRunSceneIds: string[];
   currentSceneIndex: number;
   currentSceneId: string | null;

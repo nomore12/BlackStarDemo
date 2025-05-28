@@ -239,6 +239,7 @@ export const useGameStore = create<GameState>()(
                   state.selectedCharacter.currentSanity + delta
                 )
               );
+              console.log('newSanity', newSanity);
               return {
                 selectedCharacter: {
                   ...state.selectedCharacter,

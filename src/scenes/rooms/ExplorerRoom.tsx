@@ -92,6 +92,7 @@ const ExplorerRoom: React.FC = () => {
       totalScenesInRun: sceneStoreInstance.totalScenesInRun,
       initializeRunScenes: sceneStoreInstance.initializeRunScenes,
       getNextSceneUrl: sceneStoreInstance.getNextSceneUrl,
+      reset: sceneStoreInstance.reset,
     };
   }, [characterState, gameStoreInstance, sceneStoreInstance]);
 
@@ -122,13 +123,23 @@ const ExplorerRoom: React.FC = () => {
           {
             id: 'skull_observation',
             buttonText: '해골을 관찰한다.',
-            outcome: {
-              type: 'customEffect',
-              payload: {
-                effectId: 'OPEN_MODAL',
-                params: { modalKey: 'RESULT_SKULL' },
-              },
-            } as RoomOutcome,
+            outcome: [
+              {
+                type: 'decreaseSanity',
+                payload: {
+                  amount: -10,
+                  reason: '끔찍한 광경 목격',
+                },
+                text: '끔찍한 광경을 목격하여 정신력이 크게 감소합니다!',
+              } as RoomOutcome,
+              {
+                type: 'customEffect',
+                payload: {
+                  effectId: 'OPEN_MODAL',
+                  params: { modalKey: 'RESULT_SKULL' }, // RESULT_SKULL 모달로 연결
+                },
+              } as RoomOutcome,
+            ], // 배열로 닫음
           },
           {
             id: 'note_observation',
@@ -143,7 +154,7 @@ const ExplorerRoom: React.FC = () => {
           },
           {
             id: 'choice_A_ignore',
-            buttonText: '무시하고 돌아간다 (모달 닫기)',
+            buttonText: '무시한다.',
             outcome: {
               type: 'customEffect',
               payload: { effectId: 'CLOSE_MODAL' },
@@ -152,33 +163,23 @@ const ExplorerRoom: React.FC = () => {
         ],
       },
       RESULT_SKULL: {
-        // "일기장을 줍는다"가 있는 모달 수정
-        title: '낡은 문의 결과 (타입2)',
-        description: '낡은 문을 열자, 오래된 일기장을 발견했다!',
+        title: '해골을 관찰한다.',
+        description: `눈앞의 해골, 그 눈구멍은 공허하지 않았다. 역겨운 벌레가 꿈틀대며 기어 나왔고, 그것은 본능적으로 나의 가장 취약한 곳, 눈을 향해 날아들었다. 숨 막히는 공포에 눈을 감았다 뜨자, 해골의 눈에서 뿜어져 나온 빛만이 잔상처럼 남았을 뿐, 벌레는 사라지고 없었다. 정말 사라진 걸까? \n
+이성추치가 감소했습니다.(-10)`,
         actions: [
           {
-            id: 'left_door_diary_effect',
-            buttonText: '일기장을 줍는다 (효과 발생)', // 이 버튼은 이제 모달을 닫거나 뒤로 가지 않음
+            id: 'skull_result_confirm',
+            buttonText: '확인',
             outcome: {
               type: 'customEffect',
               payload: {
-                effectId: 'PLAYER_EFFECT',
-                params: { message: '지혜가 약간 상승한 것 같다!' },
+                effectId: 'GO_BACK_MODAL',
               },
             } as RoomOutcome,
           },
           {
-            // 새로 추가된 "뒤로 가기" 버튼
-            id: 'left_door_go_back',
-            buttonText: '이전 선택으로 돌아가기',
-            outcome: {
-              type: 'customEffect',
-              payload: { effectId: 'GO_BACK_MODAL' },
-            } as RoomOutcome,
-          },
-          {
-            id: 'left_door_close_finally', // 버튼 ID 명확히
-            buttonText: '만족하고 탐색 종료 (모달 닫기)',
+            id: 'skull_result_close',
+            buttonText: '탐색 종료',
             outcome: {
               type: 'customEffect',
               payload: { effectId: 'CLOSE_MODAL' },
@@ -302,6 +303,10 @@ const ExplorerRoom: React.FC = () => {
               return newHistory; // 업데이트된 히스토리 반환
             });
           }
+          break;
+        }
+        case 'decreaseSanity': {
+          gameStoreInstance.changeCharacterSanity(-10);
           break;
         }
         case 'moveToNextScene': {

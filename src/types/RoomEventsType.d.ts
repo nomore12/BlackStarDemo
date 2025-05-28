@@ -68,6 +68,11 @@ export interface CustomEffectOutcomePayload {
   params?: any;
 }
 
+export interface DecreaseSanityOutcomePayload {
+  amount: number; // 감소시킬 정신력의 양 (양수로 전달하고, 처리 시 음수로 변환)
+  reason?: string; // (선택적) 정신력 감소 이유 로그용
+}
+
 // --- RoomOutcome 타입 (Discriminated Union) ---
 export type RoomOutcome =
   | {
@@ -143,6 +148,16 @@ export type RoomOutcome =
   | {
       type: 'customEffect';
       payload: CustomEffectOutcomePayload;
+      text?: string;
+      condition?: (
+        characterState: CharacterState,
+        gameState: CombinedGameAndSceneState,
+        skillCheckResult?: SkillCheckResult
+      ) => boolean;
+    }
+  | {
+      type: 'decreaseSanity';
+      payload: DecreaseSanityOutcomePayload;
       text?: string;
       condition?: (
         characterState: CharacterState,

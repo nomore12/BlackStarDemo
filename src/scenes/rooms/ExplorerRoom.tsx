@@ -54,22 +54,18 @@ const ExplorerRoom: React.FC = () => {
   const sceneStoreInstance = useSceneStore();
   const characterFromStore = useGameStore((state) => state.selectedCharacter);
   const characterState = characterFromStore || createDummyCharacterState();
+  const [isDoorOpen, setIsDoorOpen] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentModalContent, setCurrentModalContent] =
     useState<ModalContent | null>(null);
   const [eventLog, setEventLog] = useState<string[]>([]);
-  const [modalKeyHistory, setModalKeyHistory] = useState<string[]>([]); // 모달 키 히스토리 상태
-
-  const addLog = useCallback((message: string) => {
-    setEventLog((prev) => [message, ...prev.slice(0, 9)]);
-    console.log(message);
-  }, []);
+  // const [modalKeyHistory, setModalKeyHistory] = useState<string[]>([]); //   모달 키 히스토리 상태
 
   const gameStateForCallbacks = useMemo((): GameStateForCallbacks | null => {
     if (!characterState) return null;
     return {
-      /* ... 이전과 동일 ... */ selectedCharacter: characterState,
+      selectedCharacter: characterState,
       doomGauge: gameStoreInstance.doomGauge,
       currentRoomId: sceneStoreInstance.currentSceneId,
       selectCharacter: gameStoreInstance.selectCharacter,
@@ -168,12 +164,13 @@ const ExplorerRoom: React.FC = () => {
 이성추치가 감소했습니다.(-10)`,
         actions: [
           {
-            id: 'skull_result_confirm',
-            buttonText: '확인',
+            id: 'skull_result_confirm_goto_initial', // ID를 좀 더 명확하게 변경 (선택 사항)
+            buttonText: '확인 (처음으로)', // 버튼 텍스트 변경 (선택 사항)
             outcome: {
               type: 'customEffect',
               payload: {
-                effectId: 'GO_BACK_MODAL',
+                effectId: 'OPEN_MODAL', // <<< 'OPEN_MODAL' effectId 사용
+                params: { modalKey: 'INITIAL_TYPE1' }, // <<< 열고 싶은 모달의 키를 지정
               },
             } as RoomOutcome,
           },
@@ -211,97 +208,103 @@ const ExplorerRoom: React.FC = () => {
           },
         ],
       },
+      DOOR_OPEN: {
+        title: '문을 열어본다.',
+        description: '문을 열어본다.',
+        actions: [
+          {
+            id: 'door_open_effect',
+            buttonText: '문을 열고 다음 방으로 이동한다.',
+            outcome: [
+              {
+                type: 'moveToNextScene',
+                payload: {
+                  effectId: 'PLAYER_EFFECT',
+                  params: {
+                    message: '문이 열렸다!',
+                  },
+                },
+              },
+              { type: 'customEffect', payload: { effectId: 'CLOSE_MODAL' } },
+            ] as RoomOutcome[],
+          },
+        ],
+      },
+      DOOR_CANCEL: {
+        title: '문을 열지 않는다.',
+        description: '문을 열지 않는다.',
+        actions: [
+          {
+            id: 'door_open_effect',
+            buttonText: '문을 열지 않는다.',
+            outcome: [
+              { type: 'customEffect', payload: { effectId: 'CLOSE_MODAL' } },
+            ] as RoomOutcome[],
+          },
+        ],
+      },
     }),
     []
   );
 
   const processSingleOutcome = useCallback(
     (outcome: RoomOutcome) => {
-      addLog(
-        `Outcome: ${outcome.type}, Payload: ${JSON.stringify(outcome.payload)}`
-      );
-
       switch (outcome.type) {
         case 'text':
-          addLog(`[텍스트 이벤트] ${outcome.payload}`);
           break;
         case 'customEffect': {
           const payload = outcome.payload as CustomEffectOutcomePayload;
-          addLog(
-            `[커스텀 효과]: ${payload.effectId}, Params: ${JSON.stringify(payload.params)}`
-          );
 
           if (payload.effectId === 'OPEN_MODAL' && payload.params?.modalKey) {
             const newModalKey = payload.params.modalKey;
             const nextModalData = tempModalDataStore[newModalKey];
             if (nextModalData) {
-              addLog(`모달 전환: ${newModalKey}`);
               setCurrentModalContent(nextModalData);
-              setModalKeyHistory((prevHistory) => {
-                // 히스토리 업데이트
-                if (prevHistory[prevHistory.length - 1] === newModalKey)
-                  return prevHistory; // 중복 추가 방지
-                return [...prevHistory, newModalKey];
-              });
+              // setModalKeyHistory((prevHistory: string[]) => {
+              //   if (prevHistory[prevHistory.length - 1] === newModalKey)
+              //     return prevHistory;
+              //   return [...prevHistory, newModalKey];
+              // });
               setIsModalOpen(true);
             } else {
-              addLog(`오류: ${newModalKey}에 해당하는 모달 데이터 없음`);
               setIsModalOpen(false);
               setCurrentModalContent(null);
-              setModalKeyHistory([]); // 오류 시 히스토리 초기화
+              // setModalKeyHistory([]);
             }
           } else if (payload.effectId === 'PLAYER_EFFECT') {
             const message = payload.params?.message || '효과 발생!';
             const hpChange = payload.params?.hpChange;
-            addLog(`[플레이어 영향] ${message}`);
-            if (typeof hpChange === 'number' && characterState) {
-              addLog(
-                `(시뮬레이션) ${characterState.name} 체력 ${hpChange > 0 ? '+' : ''}${hpChange}`
-              );
-              // gameStoreInstance.changeCharacterHp(hpChange);
-            }
+            // if (typeof hpChange === 'number' && characterState) {
+            // }
           } else if (payload.effectId === 'CLOSE_MODAL') {
-            addLog('모달 닫기 명령 실행');
             setIsModalOpen(false);
             setCurrentModalContent(null);
-            setModalKeyHistory([]); // 모달 닫을 때 히스토리 초기화
+            // setModalKeyHistory([]);
           } else if (payload.effectId === 'GO_BACK_MODAL') {
-            addLog('이전 모달로 돌아가기 시도');
-            setModalKeyHistory((prevHistory) => {
-              if (prevHistory.length <= 1) {
-                addLog('돌아갈 이전 모달이 없어 현재 모달을 닫습니다.');
-                setIsModalOpen(false);
-                setCurrentModalContent(null);
-                return []; // 히스토리 초기화
-              }
-              const newHistory = prevHistory.slice(0, -1); // 현재 모달 키 제거
-              const previousModalKey = newHistory[newHistory.length - 1]; // 이전 모달 키 가져오기
-
-              if (previousModalKey) {
-                const previousModalData = tempModalDataStore[previousModalKey];
-                if (previousModalData) {
-                  addLog(`'${previousModalKey}' 모달로 돌아갑니다.`);
-                  setCurrentModalContent(previousModalData);
-                  setIsModalOpen(true); // 이전 모달을 다시 염
-                } else {
-                  addLog(
-                    `오류: 이전 모달 키 '${previousModalKey}' 데이터 없음. 모달을 닫습니다.`
-                  );
-                  setIsModalOpen(false);
-                  setCurrentModalContent(null);
-                  return []; // 오류 시 히스토리 초기화
-                }
-              } else {
-                // 이론적으로는 prevHistory.length <= 1 에서 걸러짐
-                addLog(
-                  '치명적 오류: 이전 모달 키를 찾을 수 없음. 모달을 닫습니다.'
-                );
-                setIsModalOpen(false);
-                setCurrentModalContent(null);
-                return [];
-              }
-              return newHistory; // 업데이트된 히스토리 반환
-            });
+            // setModalKeyHistory((prevHistory: string[]) => {
+            //   if (prevHistory.length <= 1) {
+            //     setIsModalOpen(false);
+            //     setCurrentModalContent(null);
+            //     return [];
+            //   }
+            //   const newHistory = prevHistory.slice(0, -1);
+            //   const previousModalKey = newHistory[newHistory.length - 1];
+            //   if (previousModalKey) {
+            //     const previousModalData = tempModalDataStore[previousModalKey];
+            //     if (previousModalData) {
+            //       setCurrentModalContent(previousModalData);
+            //       setIsModalOpen(true);
+            //     } else {
+            //       setIsModalOpen(false);
+            //       setCurrentModalContent(null);
+            //       return [];
+            //     }
+            //   } else {
+            //     setIsModalOpen(false);
+            //     setCurrentModalContent(null);
+            //     return [];
+            //   }
+            // });
           }
           break;
         }
@@ -310,13 +313,12 @@ const ExplorerRoom: React.FC = () => {
           break;
         }
         case 'moveToNextScene': {
-          addLog('다음 씬으로 이동합니다.');
           setIsModalOpen(false);
           setCurrentModalContent(null);
-          setModalKeyHistory([]); // 씬 이동 시 히스토리 초기화
+          // setModalKeyHistory([]);
           const nextSceneUrl = sceneStoreInstance.getNextSceneUrl();
+          console.log('nextSceneUrl', nextSceneUrl);
           if (nextSceneUrl.startsWith('/error')) {
-            addLog(`씬 이동 오류: ${nextSceneUrl}`);
             console.error('씬 이동 오류:', nextSceneUrl);
             alert(`다음 씬 정보를 가져오는 데 실패했습니다: ${nextSceneUrl}`);
           } else {
@@ -335,13 +337,10 @@ const ExplorerRoom: React.FC = () => {
           } else if (typeof outcome !== 'object' || outcome === null) {
             logMessage = `알 수 없는 Outcome (원시 타입 또는 null), 값: ${String(outcome)}`;
           }
-          addLog(logMessage);
-          break;
         }
       }
     },
     [
-      addLog,
       tempModalDataStore,
       characterState,
       gameStoreInstance,
@@ -349,7 +348,7 @@ const ExplorerRoom: React.FC = () => {
       startFadeOutToBlack,
       setCurrentModalContent,
       setIsModalOpen,
-      setModalKeyHistory, // navigate는 startFadeOutToBlack이 내부적으로 처리 가정
+      // setModalKeyHistory,
     ]
   );
 
@@ -364,24 +363,33 @@ const ExplorerRoom: React.FC = () => {
     [processSingleOutcome]
   );
 
-  const startRoomEventWithModal = () => {
-    addLog('방 이벤트 시작 - 초기 모달(타입1) 표시');
-    const initialModalKey = 'INITIAL_TYPE1'; // 초기 모달 키
+  const handleDoorClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    setIsDoorOpen(!isDoorOpen);
+    const initialModalKey = 'DOOR_OPEN';
     const initialModalData = tempModalDataStore[initialModalKey];
     if (initialModalData) {
       setCurrentModalContent(initialModalData);
-      setModalKeyHistory([initialModalKey]); // 히스토리 시작
+      // setModalKeyHistory([initialModalKey]);
       setIsModalOpen(true);
-    } else {
-      addLog('오류: 초기 모달 데이터를 찾을 수 없음');
+    }
+  };
+
+  const startRoomEventWithModal = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const initialModalKey = 'INITIAL_TYPE1';
+    const initialModalData = tempModalDataStore[initialModalKey];
+    if (initialModalData) {
+      setCurrentModalContent(initialModalData);
+      // setModalKeyHistory([initialModalKey]);
+      setIsModalOpen(true);
     }
   };
 
   const handleCloseFromModalComponent = () => {
-    addLog('모달 컴포넌트의 자체 닫기 기능 사용됨 (배경 클릭 등)');
     setIsModalOpen(false);
     setCurrentModalContent(null);
-    setModalKeyHistory([]); // 모달 강제 종료 시 히스토리 초기화
+    // setModalKeyHistory([]);
   };
 
   if (!characterState) {
@@ -444,6 +452,7 @@ const ExplorerRoom: React.FC = () => {
           position: 'absolute',
           top: 300,
           left: 250,
+          zIndex: 10,
         }}
         onClick={startRoomEventWithModal}
       >
@@ -465,20 +474,17 @@ const ExplorerRoom: React.FC = () => {
       >
         FirstHalf01
       </Typography>
-      <Button
+      <Box
         sx={{
           position: 'absolute',
-          bottom: 0,
-          left: '50%',
-          zIndex: 101,
-          transform: 'translateX(-50%)',
+          width: '187px',
+          height: '310px',
+          top: 130,
+          left: 304,
+          zIndex: 1,
         }}
-        onClick={() =>
-          startFadeOutToBlack(sceneStoreInstance.getNextSceneUrl(), 1500)
-        }
-      >
-        Next Scene
-      </Button>
+        onClick={handleDoorClick}
+      ></Box>
       {currentModalContent && (
         <CommonEventModal
           open={isModalOpen}
@@ -488,49 +494,6 @@ const ExplorerRoom: React.FC = () => {
         />
       )}
     </Box>
-    // <Box sx={{ padding: 2, backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
-    //   <Typography variant="h5">ExplorerRoom (모달 테스트 통합)</Typography>
-    //   <Button
-    //     variant="contained"
-    //     onClick={startRoomEventWithModal}
-    //     sx={{ my: 2 }}
-    //   >
-    //     방 이벤트 시작 (모달)
-    //   </Button>
-
-    //   <Box
-    //     sx={{
-    //       mt: 1,
-    //       p: 1,
-    //       border: '1px solid lightgray',
-    //       backgroundColor: 'white',
-    //       color: 'black',
-    //       maxHeight: 200,
-    //       overflowY: 'auto',
-    //     }}
-    //   >
-    //     <Typography variant="subtitle2">이벤트 로그:</Typography>
-    //     {eventLog.map((log, i) => (
-    //       <Typography
-    //         key={i}
-    //         variant="caption"
-    //         display="block"
-    //         sx={{ whiteSpace: 'pre-wrap' }}
-    //       >
-    //         {log}
-    //       </Typography>
-    //     ))}
-    //   </Box>
-
-    //   {currentModalContent && (
-    //     <CommonEventModal
-    //       open={isModalOpen}
-    //       onClose={handleCloseFromModalComponent}
-    //       content={currentModalContent}
-    //       onProcessOutcomes={processModalActionOutcome}
-    //     />
-    //   )}
-    // </Box>
   );
 };
 

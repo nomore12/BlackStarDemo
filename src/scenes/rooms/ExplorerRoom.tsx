@@ -12,7 +12,6 @@ import {
 } from '../../store/characterStore';
 import { usePageTransition } from '../../contexts/PageTransitionContext';
 import CommonEventModal from '../../components/CommonEventModal';
-// import { explorerRoom_SkullAndNote_Data as actualRoomData } from '../../data/ExplorerRoomEvents';
 
 import {
   ModalContent,
@@ -53,7 +52,7 @@ const ExplorerRoom: React.FC = () => {
   const gameStoreInstance = useGameStore();
   const sceneStoreInstance = useSceneStore();
   const characterFromStore = useGameStore((state) => state.selectedCharacter);
-  const characterState = characterFromStore || createDummyCharacterState();
+  const characterState = characterFromStore;
   const [isDoorOpen, setIsDoorOpen] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -126,7 +125,6 @@ const ExplorerRoom: React.FC = () => {
                   amount: -10,
                   reason: '끔찍한 광경 목격',
                 },
-                text: '끔찍한 광경을 목격하여 정신력이 크게 감소합니다!',
               } as RoomOutcome,
               {
                 type: 'customEffect',
@@ -150,7 +148,7 @@ const ExplorerRoom: React.FC = () => {
           },
           {
             id: 'choice_A_ignore',
-            buttonText: '무시한다.',
+            buttonText: '조사를 그만둔다.',
             outcome: {
               type: 'customEffect',
               payload: { effectId: 'CLOSE_MODAL' },
@@ -203,7 +201,13 @@ const ExplorerRoom: React.FC = () => {
                   },
                 },
               },
-              { type: 'customEffect', payload: { effectId: 'CLOSE_MODAL' } },
+              {
+                type: 'customEffect',
+                payload: {
+                  effectId: 'OPEN_MODAL', // <<< 'OPEN_MODAL' effectId 사용
+                  params: { modalKey: 'INITIAL_TYPE1' }, // <<< 열고 싶은 모달의 키를 지정
+                },
+              },
             ] as RoomOutcome[],
           },
         ],

@@ -78,7 +78,6 @@ export type RoomOutcome =
   | {
       type: 'text';
       payload: TextOutcomePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -88,7 +87,6 @@ export type RoomOutcome =
   | {
       type: 'updateCharacterState';
       payload: UpdateCharacterStatePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -98,7 +96,6 @@ export type RoomOutcome =
   | {
       type: 'addItem';
       payload: AddItemOutcomePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -108,7 +105,6 @@ export type RoomOutcome =
   | {
       type: 'removeItem';
       payload: RemoveItemOutcomePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -118,7 +114,6 @@ export type RoomOutcome =
   | {
       type: 'startCombat';
       payload: StartCombatOutcomePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -128,7 +123,6 @@ export type RoomOutcome =
   | {
       type: 'moveToNextScene';
       payload?: undefined;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -138,7 +132,6 @@ export type RoomOutcome =
   | {
       type: 'openModal';
       payload: OpenModalOutcomePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -148,7 +141,6 @@ export type RoomOutcome =
   | {
       type: 'customEffect';
       payload: CustomEffectOutcomePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,
@@ -158,7 +150,6 @@ export type RoomOutcome =
   | {
       type: 'decreaseSanity';
       payload: DecreaseSanityOutcomePayload;
-      text?: string;
       condition?: (
         characterState: CharacterState,
         gameState: CombinedGameAndSceneState,

@@ -66,7 +66,6 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
             {
               type: 'updateCharacterState',
               payload: { sanityChange: -15 },
-              text: '해골에 손을 대자 차가운 냉기가 온몸으로 퍼져나간다.',
             },
             {
               type: 'text',

@@ -1,5 +1,5 @@
 // components/CommonEventModal.tsx
-import React from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Dialog,
   DialogActions,
@@ -50,17 +50,61 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
   const gameStoreState = useGameStore.getState();
   const sceneStoreState = useSceneStore.getState();
 
+  const [displayedDescription, setDisplayedDescription] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   const combinedGameState: CombinedGameAndSceneState | null = characterState
     ? { ...gameStoreState, ...sceneStoreState }
     : null;
 
-  const getDescriptionText = (): string => {
+  const descriptionText = useMemo(() => {
     if (typeof description === 'function') {
-      // characterState와 combinedGameState가 null일 수 있는 상황을 함수 시그니처에 맞게 처리
       return description(characterState, combinedGameState);
     }
     return description;
-  };
+  }, [description, characterState, combinedGameState]);
+
+  useEffect(() => {
+    // descriptionText가 유효한 문자열이고, open 상태일 때만 실행
+    if (open && descriptionText && descriptionText.trim() !== '') {
+      setDisplayedDescription('');
+      setIsTyping(true);
+      let charIndex = 0;
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+      typingIntervalRef.current = setInterval(() => {
+        if (charIndex < descriptionText.length) {
+          const charToAdd = descriptionText.charAt(charIndex);
+          setDisplayedDescription((prev) => prev + charToAdd);
+          charIndex++;
+        } else {
+          if (typingIntervalRef.current) {
+            clearInterval(typingIntervalRef.current);
+            typingIntervalRef.current = null;
+          }
+          setIsTyping(false);
+        }
+      }, 30);
+
+      return () => {
+        if (typingIntervalRef.current) {
+          clearInterval(typingIntervalRef.current);
+          typingIntervalRef.current = null;
+        }
+        setIsTyping(false);
+      };
+    } else {
+      // open이 false이거나 descriptionText가 유효하지 않은 경우
+      console.log(
+        '[CommonEventModal] Effect SKIP. Open:',
+        open,
+        'Text available:',
+        !!(descriptionText && descriptionText.trim() !== '')
+      );
+    }
+  }, [open, descriptionText]);
 
   // title이 없거나 비어있으면 렌더링하지 않음 (또는 기본값 설정)
   // if (!title && !getDescriptionText()) {
@@ -87,6 +131,16 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
         </DialogTitle>
       )}
       <DialogContent
+        onClick={() => {
+          if (isTyping && descriptionText) {
+            if (typingIntervalRef.current) {
+              clearInterval(typingIntervalRef.current);
+              typingIntervalRef.current = null;
+            }
+            setDisplayedDescription(descriptionText);
+            setIsTyping(false);
+          }
+        }}
         sx={{ paddingTop: title ? '20px !important' : '30px !important' }}
       >
         {' '}
@@ -113,14 +167,12 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
             color: '#e0e0e0', // 본문 텍스트 색상 명시 (기존 스타일 유지 시)
           }}
         >
-          {getDescriptionText()
-            .split('\n')
-            .map((line, index) => (
-              <React.Fragment key={index}>
-                {line}
-                <br />
-              </React.Fragment>
-            ))}
+          {displayedDescription.split('\n').map((line, index) => (
+            <React.Fragment key={index}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
         </Typography>
       </DialogContent>
       <DialogActions sx={{ borderTop: '1px solid #444', padding: '12px 24px' }}>
@@ -138,7 +190,14 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
               <Button
                 key={action.id || `action-${index}`}
                 variant="outlined"
-                onClick={() => onDialogActionSelect(action)}
+                onClick={() => {
+                  if (isTyping) {
+                    setDisplayedDescription(descriptionText);
+                    setIsTyping(false);
+                  } else {
+                    onDialogActionSelect(action);
+                  }
+                }}
                 fullWidth
                 color="inherit"
                 sx={{

@@ -8,7 +8,7 @@ import {
   Typography,
   Fade,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/characterStore'; // Zustand 스토어 임포트
 import { usePageTransition } from '../contexts/PageTransitionContext'; // 페이지 전환 훅 (페이드아웃용)
@@ -26,7 +26,7 @@ const explorerText = [
   '저택은 거대한 묘비처럼 음산하게 서 있었다. 빗줄기는 점점 거세지고, 낡은 창문 안쪽에서 무언가… 그림자가 어른거리는 것만 같다. 심장이 공포로 얼어붙을 것 같지만, 릴리를 찾아야 한다는 생각뿐이다. 이 문을 열면, 대체 무엇이 나를 기다리고 있을까? …괜찮아, 할 수 있어.',
 ];
 
-const MODAL_APPEAR_DELAY = 7000; // 모달이 7초 후에 나타나도록 설정
+const MODAL_APPEAR_DELAY = 4000; // 모달이 7초 후에 나타나도록 설정
 
 const IntroductionScene = () => {
   const navigate = useNavigate();
@@ -36,6 +36,8 @@ const IntroductionScene = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [currentDisplayedText, setCurrentDisplayedText] = useState('');
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null); // 인터벌 ID 저장을 위한 ref
+  const [isTyping, setIsTyping] = useState(false); // 타이핑 상태 관리
 
   const { getNextSceneUrl } = useSceneStore();
 
@@ -56,38 +58,75 @@ const IntroductionScene = () => {
   // 모달이 열리거나 텍스트 인덱스가 변경될 때 타이핑 효과 적용
   useEffect(() => {
     if (isModalOpen && currentTextIndex < textsToDisplay.length) {
-      const textToType = textsToDisplay[currentTextIndex]; // 현재 타이핑할 전체 텍스트
+      const textToType = textsToDisplay[currentTextIndex];
 
-      setCurrentDisplayedText(''); // 이전 텍스트 초기화
-      let charIndex = 0; // 변수명을 'i' 대신 'charIndex'로 변경하여 명확성 증진
+      setCurrentDisplayedText('');
+      setIsTyping(true); // 타이핑 시작
+      let charIndex = 0;
 
-      const typingInterval = setInterval(() => {
+      if (typingIntervalRef.current) {
+        // 이전 인터벌 정리
+        clearInterval(typingIntervalRef.current);
+      }
+
+      typingIntervalRef.current = setInterval(() => {
         if (charIndex < textToType.length) {
           const charToAdd = textToType.charAt(charIndex);
-
-          setCurrentDisplayedText((prev) => {
-            const newText = prev + charToAdd;
-            return newText;
-          });
+          setCurrentDisplayedText((prev) => prev + charToAdd);
           charIndex++;
         } else {
-          clearInterval(typingInterval);
+          if (typingIntervalRef.current) {
+            clearInterval(typingIntervalRef.current);
+            typingIntervalRef.current = null;
+          }
+          setIsTyping(false); // 타이핑 종료
         }
-      }, 30); // 타이핑 속도를 100ms로 느리게 조정하여 로그 확인 용이하게 함 (원래는 30)
+      }, 30);
 
       return () => {
-        clearInterval(typingInterval);
+        if (typingIntervalRef.current) {
+          clearInterval(typingIntervalRef.current);
+          typingIntervalRef.current = null;
+        }
+        setIsTyping(false); // 컴포넌트 언마운트 또는 재실행 시 타이핑 중단
       };
     }
   }, [isModalOpen, currentTextIndex, textsToDisplay]);
 
+  const completeTyping = () => {
+    // 타이핑 즉시 완료 함수
+    if (isTyping) {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+        typingIntervalRef.current = null;
+      }
+      setCurrentDisplayedText(textsToDisplay[currentTextIndex]);
+      setIsTyping(false);
+    }
+  };
+
   const handleNextText = () => {
+    if (isTyping) {
+      // 타이핑 중이면 완료시킴
+      completeTyping();
+      return; // 한번의 클릭으로 타이핑 완료만 시키고, 다음 텍스트로 넘어가지 않음 (UX 고려)
+      // 만약 바로 다음 텍스트로 넘어가고 싶다면 이 return을 제거
+    }
     if (currentTextIndex < textsToDisplay.length - 1) {
       setCurrentTextIndex(currentTextIndex + 1);
+    } else {
+      // 마지막 텍스트에서 "다음" 버튼을 누르는 경우는 없지만, 방어적으로 추가
+      // 이 경우는 handleCloseModalAndProceed가 호출될 것임
     }
   };
 
   const handleCloseModalAndProceed = () => {
+    if (isTyping) {
+      // 타이핑 중이면 완료시킴
+      completeTyping();
+      // 여기서 바로 다음 씬으로 넘어가지 않고, 사용자가 완료된 텍스트를 보고 다시 클릭하도록 유도할 수도 있음
+      // 아래 로직은 즉시 다음 씬으로 진행
+    }
     setIsModalOpen(false);
     startFadeOutToBlack(getNextSceneUrl(), 1500);
   };
@@ -143,7 +182,10 @@ const IntroductionScene = () => {
           },
         }}
       >
-        <DialogContent sx={{ flexGrow: 1, overflowY: 'auto' }}>
+        <DialogContent
+          onClick={completeTyping} // DialogContent 클릭 시 타이핑 완료
+          sx={{ flexGrow: 1, overflowY: 'auto' }}
+        >
           <Typography
             sx={{
               fontFamily: 'Hahmlet',
@@ -158,7 +200,7 @@ const IntroductionScene = () => {
         <DialogActions sx={{ padding: '0', justifyContent: 'flex-end' }}>
           {isLastText ? (
             <Button
-              onClick={handleCloseModalAndProceed}
+              onClick={handleCloseModalAndProceed} // "저택으로..." 버튼 클릭
               color="primary"
               variant="contained"
               size="small"
@@ -167,7 +209,7 @@ const IntroductionScene = () => {
             </Button>
           ) : (
             <Button
-              onClick={handleNextText}
+              onClick={handleNextText} // "다음" 버튼 클릭
               color="primary"
               variant="outlined"
               size="small"

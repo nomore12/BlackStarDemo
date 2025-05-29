@@ -10,55 +10,62 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import {
-  ModalContent,
-  ModalAction,
-  RoomOutcome,
-  RoomData,
-} from '../types/RoomEventsType'; // 타입 임포트
-import { CharacterState } from '../store/characterStore';
-import {
-  useGameStore,
-  GameState as OverallGameStatePlusDoom,
-} from '../store/characterStore';
+import { CharacterState, useGameStore } from '../store/characterStore';
 import { useSceneStore, SceneStoreState } from '../store/sceneStore';
-
-type CombinedGameAndSceneState = OverallGameStatePlusDoom & SceneStoreState;
+import { CombinedGameAndSceneState } from '../types/RoomEventsType'; // CombinedGameAndSceneState는 유지
+import {
+  DialogSystemAction,
+  DialogSystemStep,
+} from '../types/DialogSystemTypes'; // 새로운 타입 임포트
 
 interface CommonEventModalProps {
   open: boolean;
   onClose: () => void;
-  content: ModalContent | null;
-  onProcessOutcomes: (outcomes: RoomOutcome | RoomOutcome[]) => void;
+  // content: ModalContent | null; // 기존 content prop 제거
+  // onProcessOutcomes: (outcomes: RoomOutcome | RoomOutcome[]) => void; // 기존 onProcessOutcomes prop 제거
+  title?: string; // DialogSystemStep의 title (optional)
+  description:
+    | string
+    | ((
+        characterState: CharacterState | null,
+        gameState: CombinedGameAndSceneState | null
+      ) => string);
+  imagePath?: string; // DialogSystemStep의 imagePath (optional)
+  dialogActions: DialogSystemAction[]; // 새로운 actions prop
+  onDialogActionSelect: (action: DialogSystemAction) => void; // 새로운 action select 핸들러
+  // goBackStep?: () => void; // (선택적) 뒤로가기 버튼용 콜백
 }
 
 const CommonEventModal: React.FC<CommonEventModalProps> = ({
   open,
   onClose,
-  content,
-  onProcessOutcomes,
+  title,
+  description,
+  imagePath,
+  dialogActions,
+  onDialogActionSelect,
+  // goBackStep,
 }) => {
   const characterState = useGameStore.getState().selectedCharacter;
   const gameStoreState = useGameStore.getState();
   const sceneStoreState = useSceneStore.getState();
 
-  if (!content) {
-    // content가 없으면 렌더링 안 함
-    return null;
-  }
-
-  const combinedGameState: CombinedGameAndSceneState = {
-    ...gameStoreState,
-    ...sceneStoreState,
-  };
+  const combinedGameState: CombinedGameAndSceneState | null = characterState
+    ? { ...gameStoreState, ...sceneStoreState }
+    : null;
 
   const getDescriptionText = (): string => {
-    if (typeof content.description === 'function') {
-      if (!characterState) return '캐릭터 정보를 불러올 수 없습니다.'; // 방어 코드
-      return content.description(characterState, combinedGameState);
+    if (typeof description === 'function') {
+      // characterState와 combinedGameState가 null일 수 있는 상황을 함수 시그니처에 맞게 처리
+      return description(characterState, combinedGameState);
     }
-    return content.description;
+    return description;
   };
+
+  // title이 없거나 비어있으면 렌더링하지 않음 (또는 기본값 설정)
+  // if (!title && !getDescriptionText()) {
+  //   return null; // 내용이 아예 없으면 모달을 띄우지 않을 수 있음 (정책에 따라)
+  // }
 
   return (
     <Dialog
@@ -68,21 +75,27 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
       fullWidth
       PaperProps={{ sx: { backgroundColor: '#1e1e1e', color: '#c0c0c0' } }}
     >
-      <DialogTitle
-        sx={{
-          fontFamily: 'Danjo',
-          color: '#e0e0e0',
-          borderBottom: '1px solid #444',
-        }}
+      {title && (
+        <DialogTitle
+          sx={{
+            fontFamily: 'Danjo',
+            color: '#e0e0e0',
+            borderBottom: '1px solid #444',
+          }}
+        >
+          {title}
+        </DialogTitle>
+      )}
+      <DialogContent
+        sx={{ paddingTop: title ? '20px !important' : '30px !important' }}
       >
-        {content.title}
-      </DialogTitle>
-      <DialogContent sx={{ paddingTop: '20px !important' }}>
-        {content.imagePath && (
+        {' '}
+        {/* title 유무에 따라 패딩 조정 */}
+        {imagePath && (
           <Box sx={{ textAlign: 'center', mb: 2 }}>
             <img
-              src={content.imagePath}
-              alt={content.title}
+              src={imagePath}
+              alt={title || 'dialog-image'}
               style={{
                 maxHeight: '200px',
                 maxWidth: '100%',
@@ -97,6 +110,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
             fontFamily: 'Hahmlet',
             lineHeight: 1.7,
             whiteSpace: 'pre-line',
+            color: '#e0e0e0', // 본문 텍스트 색상 명시 (기존 스타일 유지 시)
           }}
         >
           {getDescriptionText()
@@ -111,58 +125,44 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
       </DialogContent>
       <DialogActions sx={{ borderTop: '1px solid #444', padding: '12px 24px' }}>
         <Stack sx={{ width: '100%', gap: 1 }}>
-          {content.actions.map((action: ModalAction) => {
-            // action 타입을 명시적으로 ModalAction
-            // characterState가 null일 경우 버튼 조건/텍스트 함수 실행 불가
-            if (!characterState) return null;
-
-            const isActionVisible = action.condition
+          {dialogActions.map((action, index) => {
+            const isVisible = action.condition
               ? action.condition(characterState, combinedGameState)
               : true;
 
-            if (!isActionVisible) {
+            if (!isVisible) {
               return null;
-            }
-
-            let buttonTextContent: string;
-            if (typeof action.buttonText === 'function') {
-              buttonTextContent = action.buttonText(
-                characterState,
-                combinedGameState
-              );
-            } else {
-              buttonTextContent = action.buttonText; // string 타입으로 이미 보장됨
             }
 
             return (
               <Button
-                key={action.id}
+                key={action.id || `action-${index}`}
                 variant="outlined"
-                onClick={() => {
-                  onProcessOutcomes(action.outcome);
-                }}
+                onClick={() => onDialogActionSelect(action)}
                 fullWidth
                 color="inherit"
-                sx={{ borderColor: '#777', '&:hover': { borderColor: '#ccc' } }}
+                sx={{
+                  borderColor: '#777',
+                  '&:hover': { borderColor: '#ccc' },
+                  fontFamily: 'Hahmlet',
+                }} // 글꼴 일관성
               >
-                {buttonTextContent}
+                {action.text}
               </Button>
             );
           })}
-          {/* 모든 액션이 숨겨졌거나 actions 배열이 비었을 때 기본 닫기 버튼 */}
-          {characterState &&
-            content.actions.filter((act) => {
-              return act.condition
-                ? act.condition(characterState, combinedGameState)
-                : true;
-            }).length === 0 && (
-              <Button onClick={onClose} variant="contained" fullWidth>
-                확인
-              </Button>
-            )}
-          {/* content.actions가 아예 없을 때를 위한 닫기 버튼 (선택적) */}
-          {!content.actions && (
-            <Button onClick={onClose} variant="contained" fullWidth>
+          {/* 모든 액션이 숨겨졌거나 actions 배열이 비었을 때 기본 닫기 버튼 (기존 로직과 유사하게) */}
+          {dialogActions.filter((act) => {
+            return act.condition
+              ? act.condition(characterState, combinedGameState)
+              : true;
+          }).length === 0 && (
+            <Button
+              onClick={onClose}
+              variant="contained"
+              fullWidth
+              sx={{ fontFamily: 'Hahmlet' }}
+            >
               확인
             </Button>
           )}

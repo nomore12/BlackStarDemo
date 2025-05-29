@@ -162,13 +162,23 @@ export interface GameState {
   selectCharacter: (characterType: 'scholar' | 'explorer' | null) => void;
   changeDoomGauge: (delta: number) => void;
   changeCharacterHp: (delta: number) => void;
-  changeCharacterSanity: (delta: number) => void;
+  changeCharacterSanity: (delta: number, reason?: string) => void;
   changeCharacterActionPoints: (delta: number) => void;
   changeCharacterReactionPoints: (delta: number) => void;
   changeCharacterInvestigationPoints: (delta: number) => void;
   changeCharacterObservationPoints: (delta: number) => void;
   changeCharacterLuckPoints: (delta: number) => void;
-  setCharacterMutate: (value: MutateState) => void; // 원래대로 복원
+  setCharacterMutate: (value: MutateState) => void;
+  applyPlayerEffect: (effect: {
+    hpChange?: number;
+    sanityChange?: number;
+    message?: string;
+    reason?: string;
+    newItemId?: string;
+    newItemName?: string;
+    newItemDescription?: string;
+    [key: string]: unknown;
+  }) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -229,7 +239,7 @@ export const useGameStore = create<GameState>()(
           });
         },
 
-        changeCharacterSanity: (delta: number) => {
+        changeCharacterSanity: (delta: number, reason?: string) => {
           set((state) => {
             if (state.selectedCharacter) {
               const newSanity = Math.max(
@@ -239,7 +249,9 @@ export const useGameStore = create<GameState>()(
                   state.selectedCharacter.currentSanity + delta
                 )
               );
-              console.log('newSanity', newSanity);
+              console.log(
+                `[Sanity Change] Amount: ${delta}, New: ${newSanity}, Max: ${state.selectedCharacter.maxSanity}, Reason: ${reason || 'N/A'}`
+              );
               return {
                 selectedCharacter: {
                   ...state.selectedCharacter,
@@ -352,6 +364,76 @@ export const useGameStore = create<GameState>()(
               };
             }
             return {};
+          });
+        },
+
+        applyPlayerEffect: (effect) => {
+          set((state) => {
+            if (!state.selectedCharacter) return {};
+
+            // eslint-disable-next-line prefer-const
+            let characterUpdate = {
+              ...state.selectedCharacter,
+            } as CharacterState;
+            // eslint-disable-next-line prefer-const
+            let logMessages: string[] = [];
+
+            if (typeof effect.hpChange === 'number') {
+              const newHP = Math.max(
+                0,
+                Math.min(
+                  characterUpdate.maxHP,
+                  characterUpdate.currentHP + effect.hpChange
+                )
+              );
+              characterUpdate.currentHP = newHP;
+              logMessages.push(
+                `HP changed by ${effect.hpChange}. New HP: ${newHP}.`
+              );
+            }
+
+            if (typeof effect.sanityChange === 'number') {
+              // applyPlayerEffect 내에서 changeCharacterSanity를 직접 호출하는 대신 로직을 통합합니다.
+              const newSanity = Math.max(
+                0,
+                Math.min(
+                  characterUpdate.maxSanity,
+                  characterUpdate.currentSanity + effect.sanityChange
+                )
+              );
+              characterUpdate.currentSanity = newSanity;
+              logMessages.push(
+                `Sanity changed by ${effect.sanityChange}. New Sanity: ${newSanity}. Reason: ${effect.reason || (effect.message && effect.sanityChange < 0 ? effect.message : 'N/A')}`
+              );
+            }
+
+            if (effect.message) {
+              logMessages.push(effect.message);
+            }
+
+            // 여기에 다른 effect 속성 처리 로직 추가 가능 (e.g., 아이템 추가, 스킬 변경 등)
+            // 예시: effect.newItemId가 있다면 아이템 목록에 추가
+            if (effect.newItemId && typeof effect.newItemId === 'string') {
+              // 실제 Item 객체를 생성하거나 찾아야 할 수 있음
+              const newItem: Item = {
+                id: effect.newItemId as string,
+                name: (effect.newItemName as string) || '새 아이템',
+                description: (effect.newItemDescription as string) || '',
+              };
+              characterUpdate.items = [...characterUpdate.items, newItem];
+              logMessages.push(`Item added: ${newItem.name}.`);
+            }
+
+            if (logMessages.length > 0) {
+              // 중복 메시지 제거 (예: effect.message가 sanityChange의 reason으로 사용된 경우)
+              const uniqueLogMessages = Array.from(new Set(logMessages));
+              console.log(
+                `[Player Effect Applied] ${uniqueLogMessages.join(' ')}`,
+                effect
+              );
+            }
+
+            return { selectedCharacter: characterUpdate };
           });
         },
       }),

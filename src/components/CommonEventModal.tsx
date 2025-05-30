@@ -34,6 +34,7 @@ interface CommonEventModalProps {
   dialogActions: DialogSystemAction[]; // 새로운 actions prop
   onDialogActionSelect: (action: DialogSystemAction) => void; // 새로운 action select 핸들러
   // goBackStep?: () => void; // (선택적) 뒤로가기 버튼용 콜백
+  selectedActionIds?: Set<string>; // 추가된 prop
 }
 
 const CommonEventModal: React.FC<CommonEventModalProps> = ({
@@ -45,6 +46,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
   dialogActions,
   onDialogActionSelect,
   // goBackStep,
+  selectedActionIds,
 }) => {
   const characterState = useGameStore.getState().selectedCharacter;
   const gameStoreState = useGameStore.getState();
@@ -64,6 +66,21 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
     }
     return description;
   }, [description, characterState, combinedGameState]);
+
+  const handleDialogClose = (event: object, reason: string) => {
+    // 바깥쪽 클릭(backdropClick)으로 인한 닫힘 요청일 경우, 항상 닫히지 않도록 함
+    if (reason === 'backdropClick') {
+      return; // 아무것도 하지 않고 함수 종료
+    }
+
+    // 그 외의 이유로 닫힘이 요청된 경우 (예: Escape 키)
+    // 부모로부터 전달받은 onClose 함수를 호출하여 다이얼로그를 닫음
+    // (만약 Escape 키로도 닫히지 않게 하려면, 아래 if(onClose) { onClose(); } 부분을 주석 처리하거나
+    // Dialog 컴포넌트에 disableEscapeKeyDown={true} 를 추가합니다.)
+    if (onClose) {
+      onClose();
+    }
+  };
 
   useEffect(() => {
     // descriptionText가 유효한 문자열이고, open 상태일 때만 실행
@@ -114,7 +131,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleDialogClose}
       maxWidth="sm"
       fullWidth
       PaperProps={{ sx: { backgroundColor: '#1e1e1e', color: '#c0c0c0' } }}
@@ -151,7 +168,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
               src={imagePath}
               alt={title || 'dialog-image'}
               style={{
-                maxHeight: '200px',
+                maxHeight: '100px',
                 maxWidth: '100%',
                 borderRadius: '4px',
               }}
@@ -177,41 +194,65 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
       </DialogContent>
       <DialogActions sx={{ borderTop: '1px solid #444', padding: '12px 24px' }}>
         <Stack sx={{ width: '100%', gap: 1 }}>
-          {dialogActions.map((action, index) => {
-            const isVisible = action.condition
-              ? action.condition(characterState, combinedGameState)
-              : true;
+          {dialogActions
+            .filter((action) => {
+              // selectedActionIds에 포함되어 있고, isDialogEnd가 아니며, id가 's_next'가 아닌 액션은 필터링 (숨김)
+              if (
+                action.id &&
+                selectedActionIds &&
+                selectedActionIds.has(action.id) &&
+                !action.isDialogEnd &&
+                action.id !== 's_next' // 's_next' ID 예외 처리 추가
+              ) {
+                return false;
+              }
+              return true;
+            })
+            .map((action, index) => {
+              const isVisible = action.condition
+                ? action.condition(characterState, combinedGameState)
+                : true;
 
-            if (!isVisible) {
-              return null;
-            }
+              if (!isVisible) {
+                return null;
+              }
 
-            return (
-              <Button
-                key={action.id || `action-${index}`}
-                variant="outlined"
-                onClick={() => {
-                  if (isTyping) {
-                    setDisplayedDescription(descriptionText);
-                    setIsTyping(false);
-                  } else {
-                    onDialogActionSelect(action);
-                  }
-                }}
-                fullWidth
-                color="inherit"
-                sx={{
-                  borderColor: '#777',
-                  '&:hover': { borderColor: '#ccc' },
-                  fontFamily: 'Hahmlet',
-                }} // 글꼴 일관성
-              >
-                {action.text}
-              </Button>
-            );
-          })}
+              return (
+                <Button
+                  key={action.id || `action-${index}`}
+                  variant="outlined"
+                  onClick={() => {
+                    if (isTyping) {
+                      setDisplayedDescription(descriptionText);
+                      setIsTyping(false);
+                    } else {
+                      onDialogActionSelect(action);
+                    }
+                  }}
+                  fullWidth
+                  color="inherit"
+                  sx={{
+                    borderColor: '#777',
+                    '&:hover': { borderColor: '#ccc' },
+                    fontFamily: 'Hahmlet',
+                  }} // 글꼴 일관성
+                >
+                  {action.text}
+                </Button>
+              );
+            })}
           {/* 모든 액션이 숨겨졌거나 actions 배열이 비었을 때 기본 닫기 버튼 (기존 로직과 유사하게) */}
           {dialogActions.filter((act) => {
+            // 여기 필터링도 selectedActionIds 및 's_next'를 고려해야 함
+            if (
+              act.id &&
+              selectedActionIds &&
+              selectedActionIds.has(act.id) &&
+              !act.isDialogEnd &&
+              act.id !== 's_next' // 's_next' ID 예외 처리 추가
+            ) {
+              return false;
+            }
             return act.condition
               ? act.condition(characterState, combinedGameState)
               : true;

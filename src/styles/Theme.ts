@@ -214,19 +214,19 @@ const theme = createTheme({
         },
         standardError: {
           borderColor: '#c62828',
-          backgroundColor: 'rgba(198, 40, 40, 0.1)',
+          backgroundColor: 'rgba(198, 40, 40, 0.5)',
         },
         standardWarning: {
           borderColor: '#b07d3a',
-          backgroundColor: 'rgba(176, 125, 58, 0.1)',
+          backgroundColor: 'rgba(176, 125, 58, 0.5)',
         },
         standardInfo: {
           borderColor: '#546e7a',
-          backgroundColor: 'rgba(84, 110, 122, 0.1)',
+          backgroundColor: 'rgba(84, 110, 122, 0.5)',
         },
         standardSuccess: {
           borderColor: '#38703a',
-          backgroundColor: 'rgba(56, 112, 58, 0.1)',
+          backgroundColor: 'rgba(56, 112, 58, 0.5)',
         },
       },
     },

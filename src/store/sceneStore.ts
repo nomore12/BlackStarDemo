@@ -1,6 +1,7 @@
 // store/sceneStore.ts
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { useGameStore } from './characterStore'; // useGameStore 임포트
 
 // 사용 가능한 씬 ID 목록
 const firstHalfScenePool: string[] = [
@@ -45,6 +46,7 @@ export interface SceneStoreState {
 
   initializeRunScenes: (characterId: CharacterType) => void;
   getNextSceneUrl: () => string; // 이 함수는 URL을 반환하고 내부적으로 상태를 업데이트합니다.
+  goHome: () => void;
   reset: () => void;
   // 실제 URL 변경은 라우팅 라이브러리가 담당해야 합니다.
 }
@@ -186,11 +188,17 @@ export const useSceneStore = create<SceneStoreState>()(
             console.warn(`씬이 많아 ${desiredTotalScenes}개로 조정합니다.`);
           }
 
+          // 새 런 시작 시 이전 런의 선택 기록도 초기화하는 것이 좋음
+          useGameStore.getState().resetDialogSelections();
+          console.log(
+            '[SceneStore] New run initialized, all dialog selections reset.'
+          );
+
           set({
             currentRunSceneIds: runScenes,
-            currentSceneIndex: -1,
+            currentSceneIndex: -1, // 아직 씬에 진입 안함
             currentSceneId: null,
-            totalScenesInRun: runScenes.length, // 실제 생성된 씬의 개수로 totalScenesInRun 업데이트
+            totalScenesInRun: runScenes.length,
           });
 
           console.log(
@@ -204,7 +212,6 @@ export const useSceneStore = create<SceneStoreState>()(
         getNextSceneUrl: (): string => {
           const currentIndex = get().currentSceneIndex;
           const runScenes = get().currentRunSceneIds;
-          // totalScenesInRun은 initializeRunScenes에서 실제 생성된 씬의 길이로 업데이트됨
           const totalScenes = get().totalScenesInRun;
 
           if (runScenes.length === 0) {
@@ -215,33 +222,40 @@ export const useSceneStore = create<SceneStoreState>()(
           }
 
           let nextIndex: number;
+          let isNewSceneTransition = false; // 새 씬으로의 전환인지 여부
 
           if (currentIndex === -1) {
+            // 첫 씬 진입
             nextIndex = 0;
+            // 첫 씬 진입 시에는 초기화하지 않음 (initializeRunScenes에서 이미 했거나, 할 필요 없음)
             console.log(
-              'getNextSceneUrl - 런 시작, 첫 번째 씬으로 이동:',
+              'getNextSceneUrl - Run start, moving to first scene:',
               runScenes[nextIndex],
-              '새 인덱스:',
+              'New index:',
               nextIndex
             );
           } else if (currentIndex < totalScenes - 1) {
+            // 다음 씬으로 이동
             nextIndex = currentIndex + 1;
+            isNewSceneTransition = true; // 실제 다음 씬으로 넘어감
             console.log(
-              'getNextSceneUrl - 다음 씬으로 이동:',
+              'getNextSceneUrl - Moving to next scene:',
               runScenes[nextIndex],
-              '새 인덱스:',
+              'New index:',
               nextIndex
             );
           } else {
+            // 모든 씬 완료 또는 오류
             console.log(
-              '모든 씬을 완료했거나 더 이상 진행할 씬이 없습니다. 현재 인덱스:',
+              'All scenes completed or no more scenes to proceed. Current index:',
               currentIndex
             );
+            // 런 완료 시점에도 선택 기록 초기화 고려 가능 (이미 initializeRunScenes에서 다음 런 시작 시 초기화)
+            // useGameStore.getState().resetDialogSelections();
             set({ currentSceneId: null, currentSceneIndex: -1 });
             return '/run-complete';
           }
 
-          // nextIndex가 runScenes 배열 범위를 벗어나는지 확인
           if (nextIndex >= runScenes.length) {
             console.error(
               'nextIndex가 runScenes 배열의 범위를 벗어났습니다. Index:',
@@ -255,8 +269,14 @@ export const useSceneStore = create<SceneStoreState>()(
 
           const nextSceneId = runScenes[nextIndex];
 
-          // nextSceneId가 실제로 유효한 문자열인지 확인 (undefined나 null이 아닌지)
           if (typeof nextSceneId === 'string') {
+            // 실제 새 씬으로 전환될 때만 선택 기록 초기화
+            if (isNewSceneTransition) {
+              useGameStore.getState().resetDialogSelections();
+              console.log(
+                '[SceneStore] Moved to a new scene, all dialog selections reset.'
+              );
+            }
             set({
               currentSceneIndex: nextIndex,
               currentSceneId: nextSceneId,
@@ -273,12 +293,22 @@ export const useSceneStore = create<SceneStoreState>()(
             return '/error-scene-not-found';
           }
         },
+        goHome: () => {
+          set({
+            currentRunSceneIds: [],
+            currentSceneIndex: -1,
+            currentSceneId: null,
+          });
+        },
         reset: () => {
           set({
             currentRunSceneIds: [],
             currentSceneIndex: -1,
             currentSceneId: null,
           });
+          // 스토어 리셋 시에도 선택 기록 초기화
+          useGameStore.getState().resetDialogSelections();
+          console.log('[SceneStore] Store reset, all dialog selections reset.');
         },
       }),
       {

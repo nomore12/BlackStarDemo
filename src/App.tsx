@@ -11,8 +11,11 @@ import {
 import AppRoutes from './routes/Routes';
 import { PageTransitionProvider } from './contexts/PageTransitionContext';
 import CharacterInfo from './components/ui/CharacterInfo';
-import { Box } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { useSceneStore } from './store/sceneStore';
+import { Snackbar, Alert } from '@mui/material';
+import { useSnackbarStore } from './store/uiStore';
+import { useGameStore } from './store/characterStore';
 
 function AppContent() {
   // Router 컨텍스트 내부에서 훅을 사용하기 위한 내부 컴포넌트
@@ -49,8 +52,23 @@ function AppContent() {
 }
 
 function App() {
+  const { open, message, severity, showSnackbar, closeSnackbar } =
+    useSnackbarStore();
+
   const { currentSceneIndex, currentSceneId, currentRunSceneIds, reset } =
     useSceneStore();
+
+  const handleSnackbarClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    // 'clickaway' (바깥 클릭) 시에는 닫히지 않도록 함
+    if (reason === 'clickaway') {
+      return;
+    }
+    // 그 외의 경우 (Alert의 X 버튼 클릭 등)에는 닫도록 함
+    closeSnackbar();
+  };
 
   useEffect(() => {
     reset();
@@ -105,6 +123,53 @@ function App() {
             </Box>
           )}
         </div>
+        <Snackbar
+          sx={{ zIndex: 10000, position: 'absolute', top: 550, left: 0 }}
+          open={open}
+          autoHideDuration={10000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert
+            onClose={closeSnackbar}
+            severity={severity}
+            sx={{ width: '100%' }}
+          >
+            {message}
+          </Alert>
+        </Snackbar>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            gap: 2,
+          }}
+        >
+          <Typography variant="h6">Debug</Typography>
+          <Button
+            variant="outlined"
+            component="a"
+            href="/"
+            onClick={() => {
+              // useGameStore.getState().selectCharacter(null);
+              useSceneStore.getState().goHome();
+            }}
+          >
+            Go to title scene
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              useGameStore.getState().resetDialogSelections();
+            }}
+          >
+            Reset dialog selections
+          </Button>
+        </Box>
       </div>
     </ThemeProvider>
   );

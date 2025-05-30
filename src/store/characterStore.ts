@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { useSnackbarStore } from './uiStore';
 
 // --- 제공해주신 Mutate 관련 인터페이스 정의 ---
 export interface TentacleState {
@@ -158,6 +159,7 @@ export interface GameState {
   selectedCharacter: CharacterState | null;
   doomGauge: number;
   currentRoomId: string | null;
+  dialogSelections: Record<string, string[]>;
 
   selectCharacter: (characterType: 'scholar' | 'explorer' | null) => void;
   changeDoomGauge: (delta: number) => void;
@@ -179,15 +181,20 @@ export interface GameState {
     newItemDescription?: string;
     [key: string]: unknown;
   }) => void;
+
+  addDialogSelection: (dialogKey: string, actionId: string) => void;
+  getDialogSelections: (dialogKey: string) => Set<string>;
+  resetDialogSelections: (dialogKey?: string) => void;
 }
 
 export const useGameStore = create<GameState>()(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         selectedCharacter: null,
         doomGauge: 0,
         currentRoomId: null,
+        dialogSelections: {},
 
         selectCharacter: (characterType) => {
           if (characterType === null) {
@@ -249,6 +256,14 @@ export const useGameStore = create<GameState>()(
                   state.selectedCharacter.currentSanity + delta
                 )
               );
+              if (delta < 0) {
+                useSnackbarStore.getState().showSnackbar(
+                  `이성이 ${Math.abs(delta)} 만큼 감소했습니다. (${reason})`,
+                  newSanity < state.selectedCharacter.maxSanity * 0.3
+                    ? 'warning'
+                    : 'info' // 이성이 낮으면 경고
+                );
+              }
               console.log(
                 `[Sanity Change] Amount: ${delta}, New: ${newSanity}, Max: ${state.selectedCharacter.maxSanity}, Reason: ${reason || 'N/A'}`
               );
@@ -434,6 +449,35 @@ export const useGameStore = create<GameState>()(
             }
 
             return { selectedCharacter: characterUpdate };
+          });
+        },
+
+        addDialogSelection: (dialogKey, actionId) => {
+          set((state) => {
+            const currentSelections = state.dialogSelections[dialogKey] || [];
+            if (!currentSelections.includes(actionId)) {
+              return {
+                dialogSelections: {
+                  ...state.dialogSelections,
+                  [dialogKey]: [...currentSelections, actionId],
+                },
+              };
+            }
+            return {};
+          });
+        },
+        getDialogSelections: (dialogKey) => {
+          const selectionsArray = get().dialogSelections[dialogKey] || [];
+          return new Set(selectionsArray);
+        },
+        resetDialogSelections: (dialogKey) => {
+          set((state) => {
+            if (dialogKey) {
+              const newSelections = { ...state.dialogSelections };
+              delete newSelections[dialogKey];
+              return { dialogSelections: newSelections };
+            }
+            return { dialogSelections: {} };
           });
         },
       }),

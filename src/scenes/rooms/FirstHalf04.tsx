@@ -25,6 +25,21 @@ const FirstHalf04: React.FC = () => {
         src="images/room.png"
         alt="manor"
       />
+      <Box
+        sx={{
+          width: 300,
+          height: 300,
+          position: 'absolute',
+          top: 240,
+          left: 360,
+        }}
+      >
+        <img
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          src="images/fanatic.png"
+          alt="fanatic"
+        />
+      </Box>
       <Typography
         sx={{
           position: 'absolute',

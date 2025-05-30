@@ -37,7 +37,7 @@ const CHARACTER_FIXED_SCENES: Record<CharacterType, string> = {
 const LAST_STAGE_SCENE_ID = 'last-stage-room';
 
 // SceneStore의 상태 인터페이스
-interface SceneStoreState {
+export interface SceneStoreState {
   currentRunSceneIds: string[];
   currentSceneIndex: number;
   currentSceneId: string | null;
@@ -45,6 +45,7 @@ interface SceneStoreState {
 
   initializeRunScenes: (characterId: CharacterType) => void;
   getNextSceneUrl: () => string; // 이 함수는 URL을 반환하고 내부적으로 상태를 업데이트합니다.
+  reset: () => void;
   // 실제 URL 변경은 라우팅 라이브러리가 담당해야 합니다.
 }
 
@@ -271,6 +272,13 @@ export const useSceneStore = create<SceneStoreState>()(
             set({ currentSceneId: null, currentSceneIndex: -1 });
             return '/error-scene-not-found';
           }
+        },
+        reset: () => {
+          set({
+            currentRunSceneIds: [],
+            currentSceneIndex: -1,
+            currentSceneId: null,
+          });
         },
       }),
       {

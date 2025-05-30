@@ -10,6 +10,9 @@ import {
 } from 'react-router-dom'; // useNavigate는 현재 사용되지 않으므로 주석 처리 가능
 import AppRoutes from './routes/Routes';
 import { PageTransitionProvider } from './contexts/PageTransitionContext';
+import CharacterInfo from './components/ui/CharacterInfo';
+import { Box } from '@mui/material';
+import { useSceneStore } from './store/sceneStore';
 
 function AppContent() {
   // Router 컨텍스트 내부에서 훅을 사용하기 위한 내부 컴포넌트
@@ -46,6 +49,26 @@ function AppContent() {
 }
 
 function App() {
+  const { currentSceneIndex, currentSceneId, currentRunSceneIds, reset } =
+    useSceneStore();
+
+  useEffect(() => {
+    reset();
+    console.log(currentSceneIndex, currentSceneId, currentRunSceneIds);
+    const handleContextMenu = (event: MouseEvent) => {
+      // REACT_APP_DEBUG_MODE가 'false'일 때 오른쪽 클릭 방지
+      if (process.env.REACT_APP_DEBUG_MODE === 'false') {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, []); // 컴포넌트 마운트 시 한 번만 실행
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />{' '}
@@ -62,7 +85,7 @@ function App() {
       >
         <div
           style={{
-            border: '1px solid #626060',
+            border: '1px solid #0f0f0f',
             backgroundColor: '#282d29',
             display: 'flex',
             flexDirection: 'column',
@@ -76,6 +99,11 @@ function App() {
           <Router>
             <AppContent /> {/* 로직을 담은 내부 컴포넌트 사용 */}
           </Router>
+          {currentSceneIndex > -1 && (
+            <Box sx={{ position: 'absolute', top: 12, left: 12 }}>
+              <CharacterInfo />
+            </Box>
+          )}
         </div>
       </div>
     </ThemeProvider>

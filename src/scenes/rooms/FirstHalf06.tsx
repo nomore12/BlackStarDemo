@@ -25,6 +25,21 @@ const FirstHalf06: React.FC = () => {
         src="images/room.png"
         alt="manor"
       />
+      <Box
+        sx={{
+          width: 600,
+          height: 600,
+          position: 'absolute',
+          top: -45,
+          left: 100,
+        }}
+      >
+        <img
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          src="images/gate.png"
+          alt="gate"
+        />
+      </Box>
       <Typography
         sx={{
           position: 'absolute',

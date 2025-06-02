@@ -44,6 +44,8 @@ export interface CharacterState {
   maxHP: number;
   currentSanity: number;
   maxSanity: number;
+  currentInvestigationPoints: number;
+  maxInvestigationPoints: number;
   skills: Skill[];
   acquiredKeys: string[];
   items: Item[];
@@ -51,7 +53,6 @@ export interface CharacterState {
   defensePower: number;
   actionPoints: number;
   reactionPoints: number;
-  investigationPoints: number;
   observationPoints: number;
   luckPoints: number;
   mutate: MutateState; // 업데이트된 MutateState 타입 사용
@@ -96,7 +97,8 @@ export const initialScholarData: CharacterState = {
   defensePower: 3,
   actionPoints: 3,
   reactionPoints: 1,
-  investigationPoints: 15,
+  currentInvestigationPoints: 5,
+  maxInvestigationPoints: 5,
   observationPoints: 12,
   luckPoints: 5,
   mutate: {
@@ -140,7 +142,8 @@ export const initialExplorerData: CharacterState = {
   defensePower: 5,
   actionPoints: 4,
   reactionPoints: 1,
-  investigationPoints: 8,
+  currentInvestigationPoints: 4,
+  maxInvestigationPoints: 4,
   observationPoints: 15,
   luckPoints: 7,
   mutate: {
@@ -168,6 +171,7 @@ export interface GameState {
   changeCharacterActionPoints: (delta: number) => void;
   changeCharacterReactionPoints: (delta: number) => void;
   changeCharacterInvestigationPoints: (delta: number) => void;
+  resetCharacterInvestigationPoints: () => void;
   changeCharacterObservationPoints: (delta: number) => void;
   changeCharacterLuckPoints: (delta: number) => void;
   setCharacterMutate: (value: MutateState) => void;
@@ -325,6 +329,21 @@ export const useGameStore = create<GameState>()(
                 selectedCharacter: {
                   ...state.selectedCharacter,
                   investigationPoints: newVal,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        resetCharacterInvestigationPoints: () => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  currentInvestigationPoints:
+                    state.selectedCharacter.maxInvestigationPoints,
                 },
               };
             }

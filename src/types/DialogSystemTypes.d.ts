@@ -16,6 +16,7 @@ export interface DialogSystemAction {
   text: string; // 버튼에 표시될 텍스트
   nextStepId?: string; // 다음으로 이동할 다이얼로그 단계 ID
   isDialogEnd?: boolean; // 이 선택지를 고르면 다이얼로그가 종료되는지 여부
+  investigationPoints?: number; // 이 선택지를 고르면 조사 포인트를 사용하는 수치
   outcomes?: RoomOutcome | RoomOutcome[]; // 이 선택지의 결과 (기존 RoomOutcome 재활용)
   onSelect?: (context: DialogActionContext) => boolean | void; // 선택 시 실행될 커스텀 콜백 함수
   condition?: (

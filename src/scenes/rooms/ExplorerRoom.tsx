@@ -56,6 +56,7 @@ const ExplorerRoom: React.FC = () => {
   const characterState =
     useGameStore((state) => state.selectedCharacter) ??
     createDummyCharacterState();
+  const { changeCharacterInvestigationPoints } = useGameStore();
 
   const gameStateForCallbacks =
     useMemo((): CombinedGameAndSceneState | null => {
@@ -90,6 +91,7 @@ const ExplorerRoom: React.FC = () => {
               {
                 id: 's_observe_skull',
                 text: '해골을 관찰한다.',
+                investigationPoints: 1,
                 outcomes: [
                   {
                     type: 'decreaseSanity',
@@ -101,11 +103,13 @@ const ExplorerRoom: React.FC = () => {
               {
                 id: 's_observe_note',
                 text: '노트를 관찰한다.',
+                investigationPoints: 3,
                 nextStepId: 'result_note_start',
               },
               {
                 id: 's_check_drawer', // === 새로운 서랍 조사 액션 추가 ===
                 text: '테이블 서랍을 살펴본다.',
+                investigationPoints: 2,
                 nextStepId: 'drawer_interaction_start_unique', // 새로운 서랍 상호작용 시작 스텝으로 연결 (ID 고유하게 변경)
               },
               {

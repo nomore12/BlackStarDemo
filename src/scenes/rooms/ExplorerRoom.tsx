@@ -1,77 +1,39 @@
 // src/scenes/rooms/ExplorerRoom.tsx
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Box, Typography } from '@mui/material';
 
-import { useSceneStore, SceneStoreState } from '../../store/sceneStore';
+import { useSceneStore } from '../../store/sceneStore';
 import {
   useGameStore,
-  CharacterState,
-  GameState as OverallGameState,
+  // CharacterState, // characterState 직접 사용하지 않으므로 제거 가능
 } from '../../store/characterStore';
 import { usePageTransition } from '../../contexts/PageTransitionContext';
-import CommonEventModal from '../../components/CommonEventModal';
+// import CommonEventModal from '../../components/CommonEventModal'; // 제거
+import CharacterLoadingPlaceholder from '../../components/CharacterLoadingPlaceholder';
+import RoomDialogController from '../../components/RoomDialogController'; // 새로 추가
 
-import {
-  RoomOutcome,
-  CustomEffectOutcomePayload,
-  CombinedGameAndSceneState,
-} from '../../types/RoomEventsType';
-import {
-  DialogSequence,
-  DialogSystemStep,
-  DialogSystemAction,
-} from '../../types/DialogSystemTypes';
-import { useDialogSystem } from '../../hooks/useDialogSystem';
+import type { RoomOutcome } from '../../types/RoomEventsType';
+import type { DialogSequence } from '../../types/DialogSystemTypes';
+// import { useRoomDialogManager } from '../../hooks/useRoomDialogManager'; // 제거
 import { processSingleOutcome } from '../../utils/outcomeHandlers';
-
-const createDummyCharacterState = (): CharacterState => ({
-  id: 'explorer-char',
-  name: '탐험가',
-  title: '길잃은 탐험가',
-  currentHP: 80,
-  maxHP: 100,
-  currentSanity: 60,
-  maxSanity: 100,
-  skills: [{ id: 'survival', name: '생존술', description: '생존에 유리' }],
-  acquiredKeys: [],
-  items: [],
-  attackPower: 7,
-  defensePower: 4,
-  currentActionPoints: 3,
-  maxActionPoints: 3,
-  currentReactionPoints: 1,
-  maxReactionPoints: 1,
-  currentInvestigationPoints: 5,
-  maxInvestigationPoints: 5,
-  observationPoints: 12,
-  luckPoints: 5,
-  mutate: {
-    tentacled: { isTentacle: false },
-    theOtherWorldKnowledge: { isTheOtherWorldKnowledge: false },
-  },
-});
+import { createDummyCharacterState } from '../../utils/characterUtils';
 
 const ExplorerRoom: React.FC = () => {
-  const navigate = useNavigate();
   const { startFadeOutToBlack } = usePageTransition();
   const gameStoreInstance = useGameStore();
   const sceneStoreInstance = useSceneStore();
-  const characterState =
-    useGameStore((state) => state.selectedCharacter) ??
-    createDummyCharacterState();
 
-  const gameStateForCallbacks =
-    useMemo((): CombinedGameAndSceneState | null => {
-      if (!gameStoreInstance.selectedCharacter) return null;
+  // RoomDialogController를 위한 상태
+  const [activeDialogId, setActiveDialogId] = useState<string | null>(null);
 
-      return {
-        ...gameStoreInstance,
-        ...sceneStoreInstance,
-      };
-    }, [gameStoreInstance, sceneStoreInstance]);
+  // characterState는 RoomDialogController 내부 또는 CommonEventModal 내부에서 가져오므로
+  // 여기서 selectedCharacter를 직접 확인하는 로직은 유지 (로딩 플레이스홀더용)
+  const selectedCharacter = useGameStore((state) => state.selectedCharacter);
+  // RoomDialogController에 characterState를 직접 넘기지 않으므로, 아래 characterState 변수는 여기서 불필요해짐
+  // const characterStateForDialogManager =
+  //   selectedCharacter ?? createDummyCharacterState();
 
-  const explorerRoomDialogs: Record<string, DialogSequence> = useMemo(
+  const roomDialogs: Record<string, DialogSequence> = useMemo(
     () => ({
       skullAndNote: {
         id: 'skullAndNote',
@@ -87,9 +49,9 @@ const ExplorerRoom: React.FC = () => {
           },
           choice_table: {
             id: 'choice_table',
-            title: '해골과 펼쳐져 있는 낡은 노트, 그리고 서랍', // 서랍 언급 추가
+            title: '해골과 펼쳐져 있는 낡은 노트, 그리고 서랍',
             description:
-              '섬뜩한 해골과 그 해골이 지키는 낡은 노트. 그 안의 이야기는 분명 위험하지만, 참을 수 없이 궁금해진다. 테이블 한쪽에는 작은 서랍도 보인다.', // 서랍 언급 추가
+              '섬뜩한 해골과 그 해골이 지키는 낡은 노트. 그 안의 이야기는 분명 위험하지만, 참을 수 없이 궁금해진다. 테이블 한쪽에는 작은 서랍도 보인다.',
             actions: [
               {
                 id: 's_observe_skull',
@@ -110,10 +72,10 @@ const ExplorerRoom: React.FC = () => {
                 nextStepId: 'result_note_start',
               },
               {
-                id: 's_check_drawer', // === 새로운 서랍 조사 액션 추가 ===
+                id: 's_check_drawer',
                 text: '테이블 서랍을 살펴본다.',
                 investigationPoints: 2,
-                nextStepId: 'drawer_interaction_start_unique', // 새로운 서랍 상호작용 시작 스텝으로 연결 (ID 고유하게 변경)
+                nextStepId: 'drawer_interaction_start_unique',
               },
               {
                 id: 's_ignore_table',
@@ -123,7 +85,6 @@ const ExplorerRoom: React.FC = () => {
             ],
           },
           result_skull: {
-            // === 기존 해골 조사 내용 (변경 없음) ===
             id: 'result_skull',
             title: '해골을 관찰한다.',
             description: `눈앞의 해골, 그 눈구멍은 공허하지 않았다. 역겨운 벌레가 꿈틀대며 기어 나왔고, 그것은 본능적으로 나의 가장 취약한 곳, 눈을 향해 날아들었다. 숨 막히는 공포에 눈을 감았다 뜨자, 해골의 눈에서 뿜어져 나온 빛만이 잔상처럼 남았을 뿐, 벌레는 사라지고 없었다. 정말 사라진 걸까?`,
@@ -140,7 +101,6 @@ const ExplorerRoom: React.FC = () => {
               },
             ],
           },
-          // --- 기존 노트 읽기 스텝 (점진적 공개 - 변경 없음) ---
           result_note_start: {
             id: 'result_note_start',
             title: '낡은 노트를 읽어본다.',
@@ -205,7 +165,7 @@ const ExplorerRoom: React.FC = () => {
           result_note_end: {
             id: 'result_note_end',
             title: '노트의 마지막 장...',
-            description: (characterState, gameState) => {
+            description: (characterStateForDesc, gameStateForDesc) => {
               let text =
                 '마지막 장에는 피로 보이는 검붉은 얼룩과 함께, 거의 해독 불가능할 정도로 뒤틀린 글씨로 단 한 문장만이 갈겨져 있었다.\n\n"오빠... 모든 것이 연결되어 있어. 곧 만나게 될 거야... 이면에서. 나처럼... 아름답게..."\n\n';
               text +=
@@ -214,8 +174,8 @@ const ExplorerRoom: React.FC = () => {
                 '이것은 더 이상 희망의 단서가 아니었다. 동생이 이미 돌아올 수 없는 강을 건넜다는, 끔찍한 현실을 알리는 경고장이었다.';
 
               if (
-                characterState &&
-                characterState.mutate.theOtherWorldKnowledge
+                characterStateForDesc &&
+                characterStateForDesc.mutate.theOtherWorldKnowledge
                   .isTheOtherWorldKnowledge
               ) {
                 text +=
@@ -252,7 +212,7 @@ const ExplorerRoom: React.FC = () => {
                   {
                     type: 'decreaseSanity',
                     payload: {
-                      amount: -10, // 이 부분은 중복될 수 있으므로 시나리오에 맞게 조정이 필요합니다.
+                      amount: -10,
                       reason: '동생이 완전히 변해버렸음을 깨달음 (재확인)',
                     },
                   },
@@ -260,33 +220,28 @@ const ExplorerRoom: React.FC = () => {
               },
             ],
           },
-          // --- 기존 노트 읽기 스텝 종료 ---
-
-          // === 제안 2: 특이한 내용물이 있는 서랍 (새로 추가되는 부분) ===
           drawer_interaction_start_unique: {
-            // ID를 고유하게 변경 (기존 제안과 다르게)
             id: 'drawer_interaction_start_unique',
             title: '테이블 서랍',
             description:
               '테이블 아래의 낡은 서랍. 손잡이에 희미하게나마 별 모양 문양이 새겨져 있는 것 같다.',
             actions: [
               {
-                id: 'drawer_open_carefully_unique', // 액션 ID도 고유하게
+                id: 'drawer_open_carefully_unique',
                 text: '조심스럽게 서랍을 열어본다.',
                 nextStepId: 'drawer_contents_reveal_unique',
               },
               {
                 id: 'drawer_leave_it_star_unique',
                 text: '수상해 보인다. 건드리지 말자.',
-                nextStepId: 'choice_table', // 테이블 선택지로 돌아감
+                nextStepId: 'choice_table',
               },
             ],
           },
-
           drawer_contents_reveal_unique: {
             id: 'drawer_contents_reveal_unique',
             title: '서랍 속 내용물',
-            imagePath: 'images/letterNstone.png', // 서랍 내부 이미지 경로 (실제 이미지 파일 필요)
+            imagePath: 'images/letterNstone.png',
             description:
               '서랍 안쪽 바닥에는 빛바랜 편지 한 통과 함께, 작고 검은 돌멩이가 놓여 있다. 돌멩이는 이상할 정도로 차갑고, 가만히 귀 기울이면 희미한 속삭임 같은 것이 들려오는 듯하다.',
             actions: [
@@ -308,9 +263,8 @@ const ExplorerRoom: React.FC = () => {
                     payload:
                       '돌멩이를 만지자 섬뜩한 한기가 손끝을 통해 온몸으로 퍼져나간다! 머릿속에 알 수 없는 환영이 스쳐 지나갔다.',
                   },
-                  // { type: 'customEffect', payload: { effectId: 'VISION_OF_THE_PAST_UNIQUE' } } // 이벤트 트리거 시 ID 고유하게
                 ],
-                nextStepId: 'drawer_contents_reveal_unique', // 다시 내용물 확인으로 (돌멩이 만진 후)
+                nextStepId: 'drawer_contents_reveal_unique',
               },
               {
                 id: 'drawer_take_all_unique',
@@ -340,16 +294,15 @@ const ExplorerRoom: React.FC = () => {
                   },
                   { type: 'text', payload: '편지와 검은 돌멩이를 챙겼다.' },
                 ],
-                nextStepId: 'choice_table', // 아이템 획득 후 테이블 선택지로
+                nextStepId: 'choice_table',
               },
               {
                 id: 'drawer_close_contents_unique',
                 text: '서랍을 다시 닫는다.',
-                nextStepId: 'choice_table', // 테이블 선택지로 돌아감
+                nextStepId: 'choice_table',
               },
             ],
           },
-
           drawer_letter_content_unique: {
             id: 'drawer_letter_content_unique',
             title: '빛바랜 편지 (서랍)',
@@ -357,7 +310,6 @@ const ExplorerRoom: React.FC = () => {
               let content =
                 '편지는 거의 해독하기 어려울 정도로 낡았지만, 몇몇 단어는 간신히 알아볼 수 있었다.\n\n"...별들이 정렬될 때...", "...문이 열리리라...", 그리고 마지막엔 피로 보이는 얼룩과 함께 "...그녀를 막아야 해..." 라는 글자가 적혀있었다.';
               if (cs?.mutate.theOtherWorldKnowledge.isTheOtherWorldKnowledge) {
-                //
                 content +=
                   '\n\n이면의 지식 덕분에, 당신은 이 편지가 단순한 경고가 아니라, 어떤 의식의 실패와 그 결과에 대한 기록임을 깨닫는다.';
               }
@@ -373,19 +325,16 @@ const ExplorerRoom: React.FC = () => {
                     payload: { amount: -3, reason: '불길한 편지(서랍)를 읽음' },
                   },
                 ],
-                nextStepId: 'drawer_contents_reveal_unique', // 이전 내용물 확인 스텝으로 돌아감
+                nextStepId: 'drawer_contents_reveal_unique',
               },
             ],
           },
-          // === 서랍 관련 스텝 종료 ===
         },
       },
       doorInteraction: {
-        // 기존 doorInteraction 부분은 동일하게 유지
         id: 'doorInteraction',
         initialStepId: 'ask_open',
         steps: {
-          // ... (doorInteraction 스텝 내용 동일)
           ask_open: {
             id: 'ask_open',
             title: '문을 열어본다.',
@@ -428,184 +377,44 @@ const ExplorerRoom: React.FC = () => {
     [gameStoreInstance, sceneStoreInstance, startFadeOutToBlack]
   );
 
+  // useRoomDialogManager 관련 로직 제거
+  /*
+  const addDialogSelectionToStore = useGameStore((state) => state.addDialogSelection);
+  const getDialogSelectionsFromStore = useGameStore((state) => state.getDialogSelections);
+
   const {
-    isOpen: isDialogActive,
-    currentStep: currentDialogStep,
-    startDialog: startDialogFromUseDialogSystem,
-    handleActionSelect: handleDialogActionFromUseDialogSystem,
-    closeDialog: closeSystemDialogFromUseDialogSystem,
-  } = useDialogSystem({
-    dialogSequences: explorerRoomDialogs,
-    characterState,
-    gameStateForCallbacks,
+    isDialogActive,
+    currentDialogStep,
+    startDialog,
+    handleDialogAction,
+    closeDialog,
+    selectedActionIdsForCurrentDialog,
+  } = useRoomDialogManager({
+    dialogSequences: roomDialogs,
+    characterState: characterStateForDialogManager, // 수정된 characterState 사용
     processSingleOutcome: processSingleOutcomeCallback,
+    addDialogSelection: addDialogSelectionToStore,
+    getDialogSelections: getDialogSelectionsFromStore,
   });
-
-  const addDialogSelectionToStore = useGameStore(
-    (state) => state.addDialogSelection
-  );
-  const getDialogSelectionsFromStore = useGameStore(
-    (state) => state.getDialogSelections
-  );
-
-  const [dialogState, setDialogState] = useState<{
-    isOpen: boolean;
-    currentDialogId: string | null;
-    currentStepId: string | null;
-    history: { dialogId: string; stepId: string }[];
-    selectedActionIds: Set<string>;
-  }>({
-    isOpen: false,
-    currentDialogId: null,
-    currentStepId: null,
-    history: [],
-    selectedActionIds: new Set(),
-  });
-
-  const actualStartDialog = useCallback(
-    (dialogId: string, stepId?: string) => {
-      const sequence = explorerRoomDialogs[dialogId];
-      if (!sequence) {
-        console.error(`Dialog sequence ${dialogId} not found.`);
-        return;
-      }
-      const initialStepId = stepId || sequence.initialStepId;
-      const selectionsFromStore = getDialogSelectionsFromStore(dialogId);
-      setDialogState({
-        isOpen: true,
-        currentDialogId: dialogId,
-        currentStepId: initialStepId,
-        history: [],
-        selectedActionIds: selectionsFromStore,
-      });
-    },
-    [explorerRoomDialogs, getDialogSelectionsFromStore]
-  );
-
-  const actualCloseDialog = useCallback(() => {
-    setDialogState((prev) => ({
-      ...prev,
-      isOpen: false,
-      currentDialogId: null,
-      currentStepId: null,
-      history: [],
-    }));
-  }, []);
-
-  const actualCurrentStep: DialogSystemStep | null = useMemo(() => {
-    if (
-      !dialogState.isOpen ||
-      !dialogState.currentDialogId ||
-      !dialogState.currentStepId
-    ) {
-      return null;
-    }
-    const sequence = explorerRoomDialogs[dialogState.currentDialogId];
-    if (!sequence) return null;
-    return sequence.steps[dialogState.currentStepId] || null;
-  }, [
-    dialogState.isOpen,
-    dialogState.currentDialogId,
-    dialogState.currentStepId,
-    explorerRoomDialogs,
-  ]);
-
-  const actualHandleActionSelect = useCallback(
-    (action: DialogSystemAction) => {
-      if (!actualCurrentStep || !dialogState.currentDialogId || !action.id)
-        return;
-
-      if (action.outcomes) {
-        const outcomesToProcess = Array.isArray(action.outcomes)
-          ? action.outcomes
-          : [action.outcomes];
-        outcomesToProcess.forEach(processSingleOutcomeCallback);
-      }
-
-      if (!action.isDialogEnd) {
-        addDialogSelectionToStore(dialogState.currentDialogId, action.id);
-        setDialogState((prev) => ({
-          ...prev,
-          selectedActionIds: new Set(prev.selectedActionIds).add(action.id!),
-        }));
-      }
-
-      if (action.isDialogEnd) {
-        actualCloseDialog();
-      } else if (action.nextStepId) {
-        const currentDialogId = dialogState.currentDialogId;
-        const newHistory = [
-          ...dialogState.history,
-          { dialogId: currentDialogId!, stepId: dialogState.currentStepId! },
-        ];
-        setDialogState((prev) => ({
-          ...prev,
-          currentStepId: action.nextStepId!,
-          history: newHistory,
-        }));
-      }
-    },
-    [
-      actualCurrentStep,
-      dialogState.currentDialogId,
-      dialogState.history,
-      actualCloseDialog,
-      processSingleOutcomeCallback,
-      addDialogSelectionToStore,
-    ]
-  );
-
-  const finalIsDialogActive = dialogState.isOpen;
-  const finalCurrentDialogStep = actualCurrentStep;
-  const finalStartDialog = actualStartDialog;
-  const finalHandleDialogAction = actualHandleActionSelect;
-  const finalCloseSystemDialog = actualCloseDialog;
-  const finalSelectedActionIdsForCurrentStep = dialogState.selectedActionIds;
+  */
 
   const handleSkullTableClick = (e: React.MouseEvent<HTMLDivElement>) => {
     console.log('handleSkullTableClick');
     e.stopPropagation();
-    finalStartDialog('skullAndNote');
+    setActiveDialogId('skullAndNote'); // 상태 업데이트로 변경
   };
 
   const handleDoorClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    finalStartDialog('doorInteraction');
+    setActiveDialogId('doorInteraction'); // 상태 업데이트로 변경
   };
 
-  if (!characterState) {
-    return (
-      <Box
-        sx={{
-          padding: 2,
-          color: 'black',
-          textAlign: 'center',
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography variant="h5">캐릭터 정보를 로딩 중입니다...</Typography>
-      </Box>
-    );
-  }
-  if (!gameStateForCallbacks && characterState) {
-    return (
-      <Box
-        sx={{
-          padding: 2,
-          color: 'black',
-          textAlign: 'center',
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography variant="h5">게임 상태를 초기화 중입니다...</Typography>
-      </Box>
-    );
+  const handleCloseDialog = () => {
+    setActiveDialogId(null);
+  };
+
+  if (!selectedCharacter) {
+    return <CharacterLoadingPlaceholder />;
   }
 
   return (
@@ -643,18 +452,6 @@ const ExplorerRoom: React.FC = () => {
           alt="skullontable"
         />
       </Box>
-      <Typography
-        sx={{
-          position: 'absolute',
-          top: '10%',
-          left: '50%',
-          zIndex: 101,
-          transform: 'translateX(-50%)',
-        }}
-        variant="h1"
-      >
-        FirstHalf01
-      </Typography>
       <Box
         sx={{
           position: 'absolute',
@@ -667,18 +464,12 @@ const ExplorerRoom: React.FC = () => {
         onClick={handleDoorClick}
       ></Box>
 
-      {finalIsDialogActive && finalCurrentDialogStep && (
-        <CommonEventModal
-          open={finalIsDialogActive}
-          onClose={finalCloseSystemDialog}
-          title={finalCurrentDialogStep.title}
-          description={finalCurrentDialogStep.description}
-          imagePath={finalCurrentDialogStep.imagePath}
-          dialogActions={finalCurrentDialogStep.actions}
-          onDialogActionSelect={finalHandleDialogAction}
-          selectedActionIds={finalSelectedActionIdsForCurrentStep}
-        />
-      )}
+      <RoomDialogController
+        dialogSequences={roomDialogs}
+        activeDialogId={activeDialogId}
+        onCloseDialog={handleCloseDialog}
+        processSingleOutcome={processSingleOutcomeCallback}
+      />
     </Box>
   );
 };

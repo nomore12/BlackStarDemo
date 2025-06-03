@@ -11,7 +11,7 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
   id: 'explorer-specific-room',
   backgroundImagePath: 'images/room_gloomy_study.png',
   initialDescription: (
-    cs: CharacterState,
+    cs: CharacterState | null | undefined,
     gs: CombinedGameAndSceneState // 타입 명시
   ) =>
     `음산한 기운이 감도는 ${gs.currentRoomId || '이'} 방에 들어섰다. 테이블 위에는 먼지가 뽀얗게 쌓인 해골과 낡은 노트 한 권이 놓여 있다.`,
@@ -21,9 +21,9 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
       name: '테이블 위 해골',
       imagePath: 'images/skullontable.png',
       description: (
-        cs: CharacterState // 타입 명시
+        cs: CharacterState | null | undefined // 타입 명시
       ) =>
-        `섬뜩한 해골이다. ${cs.observationPoints > 10 ? '눈구멍 안쪽에서 미세한 움직임이 느껴지는 것 같다.' : '눈구멍 안쪽은 어두워 잘 보이지 않는다.'}`,
+        `섬뜩한 해골이다. ${cs?.observationPoints && cs.observationPoints > 10 ? '눈구멍 안쪽에서 미세한 움직임이 느껴지는 것 같다.' : '눈구멍 안쪽은 어두워 잘 보이지 않는다.'}`,
       actions: [
         {
           id: 'observeSkull',
@@ -47,8 +47,10 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
                   id: 'skull_modal_investigate_light',
                   buttonText: '빛의 근원을 조사한다',
                   condition: (
-                    cs: CharacterState // 타입 명시
-                  ) => cs.skills.some((s) => s.id === 'analytical_thinking'),
+                    cs: CharacterState | null | undefined // 타입 명시
+                  ) =>
+                    !!cs &&
+                    cs.skills.some((s) => s.id === 'analytical_thinking'),
                   outcome: {
                     type: 'text',
                     payload: '학자라면 빛을 조사할 수 있을 텐데...',
@@ -57,7 +59,8 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
               ],
             } as ModalContent, // ModalContent로 캐스팅 (타입 파일에서 ModalContent를 가져와 사용)
           },
-          condition: (cs: CharacterState) => cs.currentSanity > 20, // 타입 명시
+          condition: (cs: CharacterState | null | undefined) =>
+            !!cs && cs.currentSanity > 20, // 타입 명시
         },
         {
           id: 'touchSkull',
@@ -74,8 +77,8 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
             },
           ],
           condition: (
-            cs: CharacterState // 타입 명시
-          ) => !cs.mutate.tentacled.isTentacle,
+            cs: CharacterState | null | undefined // 타입 명시
+          ) => !!cs && !cs.mutate.tentacled.isTentacle,
         },
       ],
     },
@@ -92,8 +95,9 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
               // OpenModalOutcomePayload (ModalContent)
               title: '노트 내용',
               description: (
-                cs: CharacterState // 타입 명시
+                cs: CharacterState | null | undefined // 타입 명시
               ) =>
+                !!cs &&
                 cs.skills.some((s) => s.id === 'basic_academic_knowledge')
                   ? '학문 지식 덕분에 일부 내용을 해독할 수 있었다: "그것은 공허에서 왔고, 별들의 사이를 떠돈다..." (새로운 단서 획득!)'
                   : '알아보기 힘든 글씨와 기괴한 그림 뿐이다. 전혀 이해할 수 없다.',
@@ -124,8 +128,10 @@ export const explorerRoom_SkullAndNote_Data: RoomData = {
         payload:
           '불길한 예감이 들지만, 일단 눈앞의 것들을 무시하고 방의 다른 출구를 찾아본다.',
       },
-      condition: (cs: CharacterState, gs: CombinedGameAndSceneState) =>
-        gs.doomGauge < 50, // 타입 명시
+      condition: (
+        cs: CharacterState | null | undefined,
+        gs: CombinedGameAndSceneState
+      ) => !!cs && gs.doomGauge < 50, // 타입 명시
     },
   ],
 };

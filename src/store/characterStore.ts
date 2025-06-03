@@ -71,6 +71,10 @@ export interface Item {
   id: string;
   name: string;
   description: string;
+  // 필요하다면 아이템 종류, 효과, 수량 등의 속성 추가 가능
+  // type?: 'consumable' | 'keyItem' | 'equipment';
+  // effect?: string; // 아이템 사용 시 발생하는 효과 설명 또는 ID
+  // quantity?: number;
 }
 
 // 초기 데이터 (initialScholarData, initialExplorerData)는 이전과 동일하다고 가정합니다.
@@ -195,6 +199,7 @@ export interface GameState {
   addDialogSelection: (dialogKey: string, actionId: string) => void;
   getDialogSelections: (dialogKey: string) => Set<string>;
   resetDialogSelections: (dialogKey?: string) => void;
+  addItem: (item: Item) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -506,6 +511,29 @@ export const useGameStore = create<GameState>()(
               return { dialogSelections: newSelections };
             }
             return { dialogSelections: {} };
+          });
+        },
+        addItem: (itemToAdd) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              // 중복 아이템 방지 (ID 기준)
+              if (
+                state.selectedCharacter.items.find(
+                  (item) => item.id === itemToAdd.id
+                )
+              ) {
+                console.warn(`Item with id ${itemToAdd.id} already exists.`);
+                // 필요하다면 수량 증가 로직 등을 여기에 추가
+                return {}; // 이미 있으면 상태 변경 없음 (또는 수량 증가)
+              }
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  items: [...state.selectedCharacter.items, itemToAdd],
+                },
+              };
+            }
+            return {};
           });
         },
       }),

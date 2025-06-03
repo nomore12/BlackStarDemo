@@ -23,6 +23,7 @@ import {
   DialogSystemAction,
 } from '../../types/DialogSystemTypes';
 import { useDialogSystem } from '../../hooks/useDialogSystem';
+import { processSingleOutcome } from '../../utils/outcomeHandlers';
 
 const createDummyCharacterState = (): CharacterState => ({
   id: 'explorer-char',
@@ -59,7 +60,6 @@ const ExplorerRoom: React.FC = () => {
   const characterState =
     useGameStore((state) => state.selectedCharacter) ??
     createDummyCharacterState();
-  const { changeCharacterInvestigationPoints } = useGameStore();
 
   const gameStateForCallbacks =
     useMemo((): CombinedGameAndSceneState | null => {
@@ -417,63 +417,13 @@ const ExplorerRoom: React.FC = () => {
 
   const processSingleOutcomeCallback = useCallback(
     (outcome: RoomOutcome) => {
-      console.log('Processing outcome via callback:', outcome);
-      switch (outcome.type) {
-        case 'text':
-          console.log('[텍스트 이벤트]:', outcome.payload);
-          break;
-        case 'customEffect': {
-          const payload = outcome.payload as CustomEffectOutcomePayload;
-          if (payload.effectId === 'PLAYER_EFFECT') {
-            gameStoreInstance.applyPlayerEffect({
-              hpChange: payload.params?.hpChange,
-              sanityChange: payload.params?.sanityChange,
-              message: payload.params?.message || '특수 효과 발생!',
-              reason: payload.params?.reason,
-              ...payload.params,
-            });
-          } else {
-            console.warn(`Unhandled customEffect ID: ${payload.effectId}`);
-          }
-          break;
-        }
-        case 'decreaseSanity': {
-          gameStoreInstance.changeCharacterSanity(
-            outcome.payload.amount,
-            outcome.payload.reason
-          );
-          break;
-        }
-        case 'moveToNextScene': {
-          const nextSceneUrl = sceneStoreInstance.getNextSceneUrl();
-          if (nextSceneUrl.startsWith('/error')) {
-            console.error(`씬 이동 오류: ${nextSceneUrl}`);
-            alert(`다음 씬 정보를 가져오는 데 실패했습니다: ${nextSceneUrl}`);
-          } else {
-            startFadeOutToBlack(nextSceneUrl, 1000);
-          }
-          break;
-        }
-        case 'updateCharacterState': {
-          console.log(
-            '캐릭터 상태 업데이트 (TODO: 스토어 액션으로 구체화):',
-            outcome.payload
-          );
-          break;
-        }
-        default: {
-          let logMessage = `알 수 없는 Outcome, 전체 값: ${JSON.stringify(outcome)}`;
-          if (
-            typeof outcome === 'object' &&
-            outcome !== null &&
-            'type' in outcome
-          ) {
-            logMessage = `알 수 없는 Outcome 타입: ${(outcome as { type: unknown }).type}, 전체 값: ${JSON.stringify(outcome)}`;
-          }
-          console.warn(logMessage);
-          break;
-        }
-      }
+      processSingleOutcome(outcome, {
+        applyPlayerEffect: gameStoreInstance.applyPlayerEffect,
+        changeCharacterSanity: gameStoreInstance.changeCharacterSanity,
+        addItem: gameStoreInstance.addItem,
+        getNextSceneUrl: sceneStoreInstance.getNextSceneUrl,
+        startFadeOutToBlack: startFadeOutToBlack,
+      });
     },
     [gameStoreInstance, sceneStoreInstance, startFadeOutToBlack]
   );

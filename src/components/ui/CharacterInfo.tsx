@@ -2,6 +2,7 @@ import { Box, Stack } from '@mui/material';
 import React from 'react';
 import { useGameStore } from '../../store/characterStore';
 import HpSanityBar from './HpSanityBar';
+import PointViewer from './PointViewer';
 
 const CharacterInfo = () => {
   const { selectedCharacter } = useGameStore();
@@ -12,6 +13,7 @@ const CharacterInfo = () => {
         alignItems: 'center',
         width: '100%',
         height: '100%',
+        gap: 1,
       }}
     >
       {/* profile image */}
@@ -48,7 +50,25 @@ const CharacterInfo = () => {
         <HpSanityBar type="hp" />
         <HpSanityBar type="sanity" />
       </Stack>
-      <Box sx={{ ml: 2 }}>Inventory</Box>
+      <Stack sx={{ ml: 2 }}>
+        <PointViewer
+          title="조사 포인트"
+          currentPoints={selectedCharacter?.currentInvestigationPoints || 0}
+          maxPoints={selectedCharacter?.maxInvestigationPoints || 0}
+        />
+        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
+          <PointViewer
+            title="AP"
+            currentPoints={selectedCharacter?.currentActionPoints || 0}
+            maxPoints={selectedCharacter?.maxActionPoints || 0}
+          />
+          <PointViewer
+            title="RP"
+            currentPoints={selectedCharacter?.currentReactionPoints || 0}
+            maxPoints={selectedCharacter?.maxReactionPoints || 0}
+          />
+        </Box>
+      </Stack>
     </Box>
   );
 };

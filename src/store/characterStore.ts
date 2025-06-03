@@ -51,8 +51,10 @@ export interface CharacterState {
   items: Item[];
   attackPower: number;
   defensePower: number;
-  actionPoints: number;
-  reactionPoints: number;
+  currentActionPoints: number;
+  maxActionPoints: number;
+  currentReactionPoints: number;
+  maxReactionPoints: number;
   observationPoints: number;
   luckPoints: number;
   mutate: MutateState; // 업데이트된 MutateState 타입 사용
@@ -95,10 +97,12 @@ export const initialScholarData: CharacterState = {
   ],
   attackPower: 5,
   defensePower: 3,
-  actionPoints: 3,
-  reactionPoints: 1,
-  currentInvestigationPoints: 5,
-  maxInvestigationPoints: 5,
+  currentActionPoints: 3,
+  maxActionPoints: 3,
+  currentReactionPoints: 1,
+  maxReactionPoints: 1,
+  currentInvestigationPoints: 6,
+  maxInvestigationPoints: 6,
   observationPoints: 12,
   luckPoints: 5,
   mutate: {
@@ -116,7 +120,7 @@ export const initialScholarData: CharacterState = {
 
 export const initialExplorerData: CharacterState = {
   id: 'explorer',
-  name: '애비게일 홀로웨이',
+  name: '에단 홀로웨이',
   title: '절박한 탐사자',
   currentHP: 85,
   maxHP: 85,
@@ -140,8 +144,10 @@ export const initialExplorerData: CharacterState = {
   ],
   attackPower: 8,
   defensePower: 5,
-  actionPoints: 4,
-  reactionPoints: 1,
+  currentActionPoints: 4,
+  maxActionPoints: 4,
+  currentReactionPoints: 1,
+  maxReactionPoints: 1,
   currentInvestigationPoints: 4,
   maxInvestigationPoints: 4,
   observationPoints: 15,
@@ -171,7 +177,7 @@ export interface GameState {
   changeCharacterActionPoints: (delta: number) => void;
   changeCharacterReactionPoints: (delta: number) => void;
   changeCharacterInvestigationPoints: (delta: number) => void;
-  resetCharacterInvestigationPoints: () => void;
+  resetCharacterAllPoints: () => void;
   changeCharacterObservationPoints: (delta: number) => void;
   changeCharacterLuckPoints: (delta: number) => void;
   setCharacterMutate: (value: MutateState) => void;
@@ -287,12 +293,12 @@ export const useGameStore = create<GameState>()(
             if (state.selectedCharacter) {
               const newAP = Math.max(
                 0,
-                state.selectedCharacter.actionPoints + delta
+                state.selectedCharacter.currentActionPoints + delta
               );
               return {
                 selectedCharacter: {
                   ...state.selectedCharacter,
-                  actionPoints: newAP,
+                  currentActionPoints: newAP,
                 },
               };
             }
@@ -305,12 +311,12 @@ export const useGameStore = create<GameState>()(
             if (state.selectedCharacter) {
               const newRP = Math.max(
                 0,
-                state.selectedCharacter.reactionPoints + delta
+                state.selectedCharacter.currentReactionPoints + delta
               );
               return {
                 selectedCharacter: {
                   ...state.selectedCharacter,
-                  reactionPoints: newRP,
+                  currentReactionPoints: newRP,
                 },
               };
             }
@@ -323,7 +329,7 @@ export const useGameStore = create<GameState>()(
             if (state.selectedCharacter) {
               const newVal = Math.max(
                 0,
-                state.selectedCharacter.investigationPoints + delta
+                state.selectedCharacter.currentInvestigationPoints + delta
               );
               return {
                 selectedCharacter: {
@@ -336,7 +342,7 @@ export const useGameStore = create<GameState>()(
           });
         },
 
-        resetCharacterInvestigationPoints: () => {
+        resetCharacterAllPoints: () => {
           set((state) => {
             if (state.selectedCharacter) {
               return {
@@ -344,6 +350,9 @@ export const useGameStore = create<GameState>()(
                   ...state.selectedCharacter,
                   currentInvestigationPoints:
                     state.selectedCharacter.maxInvestigationPoints,
+                  currentActionPoints: state.selectedCharacter.maxActionPoints,
+                  currentReactionPoints:
+                    state.selectedCharacter.maxReactionPoints,
                 },
               };
             }

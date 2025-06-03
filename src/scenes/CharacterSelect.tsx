@@ -42,7 +42,7 @@ const charactersData: Character[] = [
   },
   {
     id: 'explorer',
-    name: '애비게일 홀로웨이',
+    name: '에단 홀로웨이',
     title: '절박한 탐사자',
     image: 'images/character_02.png',
     alt: '탐사자',

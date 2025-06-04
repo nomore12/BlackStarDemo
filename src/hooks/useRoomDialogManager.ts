@@ -6,25 +6,47 @@ import type {
   DialogSystemAction,
 } from '../types/DialogSystemTypes';
 import type { RoomOutcome } from '../types/RoomEventsType';
+import { processSingleOutcome as callProcessSingleOutcomeUtil } from '../utils/outcomeHandlers';
 
 interface UseRoomDialogManagerProps {
   dialogSequences: Record<string, DialogSequence>;
   characterState: CharacterState | null | undefined;
   // gameStateForCallbacks: any; // CombinedGameAndSceneState 대신 우선 any로 처리. 추후 정확한 타입 지정 필요
-  processSingleOutcome: (outcome: RoomOutcome) => void;
   addDialogSelection: (dialogKey: string, actionId: string) => void;
   getDialogSelections: (dialogKey: string) => Set<string>;
   onDialogShouldCloseByAction: () => void;
+  applyPlayerEffect: (effect: {
+    hpChange?: number;
+    sanityChange?: number;
+    message?: string;
+    reason?: string;
+    newItemId?: string;
+    newItemName?: string;
+    newItemDescription?: string;
+    [key: string]: unknown;
+  }) => void;
+  changeCharacterSanity: (
+    amount: number,
+    reason?: string,
+    characterId?: string
+  ) => void;
+  addItem: (item: Item, characterId?: string) => void;
+  getNextSceneUrl: () => string | undefined;
+  startFadeOutToBlack: (path: string, duration?: number) => void;
 }
 
 export const useRoomDialogManager = ({
   dialogSequences,
   characterState,
   // gameStateForCallbacks, // 현재 훅 내부에서 직접 사용되지 않음
-  processSingleOutcome,
   addDialogSelection,
   getDialogSelections,
   onDialogShouldCloseByAction,
+  applyPlayerEffect,
+  changeCharacterSanity,
+  addItem,
+  getNextSceneUrl,
+  startFadeOutToBlack,
 }: UseRoomDialogManagerProps) => {
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean;
@@ -118,7 +140,17 @@ export const useRoomDialogManager = ({
         const outcomesToProcess = Array.isArray(action.outcomes)
           ? action.outcomes
           : [action.outcomes];
-        outcomesToProcess.forEach(processSingleOutcome);
+        outcomesToProcess.forEach((outcome) =>
+          callProcessSingleOutcomeUtil(outcome, {
+            applyPlayerEffect: applyPlayerEffect,
+            changeCharacterSanity: (amount: number, reason?: string) =>
+              changeCharacterSanity(amount, reason, characterState?.id),
+            addItem: (itemPayload: Item) =>
+              addItem(itemPayload, characterState?.id),
+            getNextSceneUrl: () => getNextSceneUrl() || '',
+            startFadeOutToBlack: startFadeOutToBlack,
+          })
+        );
       }
 
       if (!action.isDialogEnd && action.id !== 's_next') {
@@ -161,9 +193,15 @@ export const useRoomDialogManager = ({
       dialogState.history,
       dialogState.currentStepId,
       closeDialog,
-      processSingleOutcome,
       addDialogSelection,
+      getDialogSelections,
       onDialogShouldCloseByAction,
+      applyPlayerEffect,
+      changeCharacterSanity,
+      addItem,
+      getNextSceneUrl,
+      startFadeOutToBlack,
+      characterState,
     ]
   );
 

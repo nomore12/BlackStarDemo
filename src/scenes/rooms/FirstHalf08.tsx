@@ -313,19 +313,6 @@ const FirstHalf08: React.FC = () => {
     []
   );
 
-  const processSingleOutcomeCallback = useCallback(
-    (outcome: RoomOutcome) => {
-      processSingleOutcome(outcome, {
-        applyPlayerEffect: gameStoreInstance.applyPlayerEffect,
-        changeCharacterSanity: gameStoreInstance.changeCharacterSanity,
-        addItem: gameStoreInstance.addItem,
-        getNextSceneUrl: sceneStoreInstance.getNextSceneUrl,
-        startFadeOutToBlack: startFadeOutToBlack,
-      });
-    },
-    [gameStoreInstance, sceneStoreInstance, startFadeOutToBlack]
-  );
-
   const handleNoteTableClick = (e: React.MouseEvent<HTMLDivElement>) => {
     console.log('handleNoteTableClick');
     e.stopPropagation();
@@ -396,7 +383,12 @@ const FirstHalf08: React.FC = () => {
         dialogSequences={roomDialogs}
         activeDialogId={activeDialogId}
         onCloseDialog={handleCloseDialog}
-        processSingleOutcome={processSingleOutcomeCallback}
+        applyPlayerEffect={gameStoreInstance.applyPlayerEffect}
+        changeCharacterSanity={gameStoreInstance.changeCharacterSanity}
+        addItem={gameStoreInstance.addItem}
+        getNextSceneUrl={sceneStoreInstance.getNextSceneUrl}
+        startFadeOutToBlack={startFadeOutToBlack}
+        characterState={selectedCharacter ?? createDummyCharacterState()}
       />
     </Box>
   );

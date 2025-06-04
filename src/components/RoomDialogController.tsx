@@ -3,25 +3,44 @@ import { useGameStore } from '../store/characterStore';
 import { useRoomDialogManager } from '../hooks/useRoomDialogManager';
 import CommonEventModal from './CommonEventModal';
 import type { DialogSequence } from '../types/DialogSystemTypes';
-import type { RoomOutcome } from '../types/RoomEventsType';
+import type { CharacterState, Item } from '../store/characterStore';
 
 interface RoomDialogControllerProps {
   dialogSequences: Record<string, DialogSequence>;
   activeDialogId: string | null;
   onCloseDialog: () => void;
-  processSingleOutcome: (outcome: RoomOutcome) => void;
+  applyPlayerEffect: (effect: {
+    hpChange?: number;
+    sanityChange?: number;
+    message?: string;
+    reason?: string;
+    newItemId?: string;
+    newItemName?: string;
+    newItemDescription?: string;
+    [key: string]: unknown;
+  }) => void;
+  changeCharacterSanity: (
+    amount: number,
+    reason?: string,
+    characterId?: string
+  ) => void;
+  addItem: (item: Item, characterId?: string) => void;
+  getNextSceneUrl: () => string | undefined;
+  startFadeOutToBlack: (path: string, duration?: number) => void;
+  characterState: CharacterState | null;
 }
 
 const RoomDialogController: React.FC<RoomDialogControllerProps> = ({
   dialogSequences,
   activeDialogId,
   onCloseDialog,
-  processSingleOutcome,
+  applyPlayerEffect,
+  changeCharacterSanity,
+  addItem,
+  getNextSceneUrl,
+  startFadeOutToBlack,
+  characterState,
 }) => {
-  const characterStateFromStore = useGameStore(
-    (state) => state.selectedCharacter
-  );
-
   const addDialogSelectionToStore = useGameStore(
     (state) => state.addDialogSelection
   );
@@ -38,11 +57,15 @@ const RoomDialogController: React.FC<RoomDialogControllerProps> = ({
     selectedActionIdsForCurrentDialog,
   } = useRoomDialogManager({
     dialogSequences,
-    characterState: characterStateFromStore,
-    processSingleOutcome,
+    characterState: characterState,
     addDialogSelection: addDialogSelectionToStore,
     getDialogSelections: getDialogSelectionsFromStore,
     onDialogShouldCloseByAction: onCloseDialog,
+    applyPlayerEffect,
+    changeCharacterSanity,
+    addItem,
+    getNextSceneUrl,
+    startFadeOutToBlack,
   });
 
   useEffect(() => {

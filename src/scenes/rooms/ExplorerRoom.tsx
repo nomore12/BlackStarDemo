@@ -364,40 +364,6 @@ const ExplorerRoom: React.FC = () => {
     []
   );
 
-  const processSingleOutcomeCallback = useCallback(
-    (outcome: RoomOutcome) => {
-      processSingleOutcome(outcome, {
-        applyPlayerEffect: gameStoreInstance.applyPlayerEffect,
-        changeCharacterSanity: gameStoreInstance.changeCharacterSanity,
-        addItem: gameStoreInstance.addItem,
-        getNextSceneUrl: sceneStoreInstance.getNextSceneUrl,
-        startFadeOutToBlack: startFadeOutToBlack,
-      });
-    },
-    [gameStoreInstance, sceneStoreInstance, startFadeOutToBlack]
-  );
-
-  // useRoomDialogManager 관련 로직 제거
-  /*
-  const addDialogSelectionToStore = useGameStore((state) => state.addDialogSelection);
-  const getDialogSelectionsFromStore = useGameStore((state) => state.getDialogSelections);
-
-  const {
-    isDialogActive,
-    currentDialogStep,
-    startDialog,
-    handleDialogAction,
-    closeDialog,
-    selectedActionIdsForCurrentDialog,
-  } = useRoomDialogManager({
-    dialogSequences: roomDialogs,
-    characterState: characterStateForDialogManager, // 수정된 characterState 사용
-    processSingleOutcome: processSingleOutcomeCallback,
-    addDialogSelection: addDialogSelectionToStore,
-    getDialogSelections: getDialogSelectionsFromStore,
-  });
-  */
-
   const handleSkullTableClick = (e: React.MouseEvent<HTMLDivElement>) => {
     console.log('handleSkullTableClick');
     e.stopPropagation();
@@ -468,7 +434,12 @@ const ExplorerRoom: React.FC = () => {
         dialogSequences={roomDialogs}
         activeDialogId={activeDialogId}
         onCloseDialog={handleCloseDialog}
-        processSingleOutcome={processSingleOutcomeCallback}
+        applyPlayerEffect={gameStoreInstance.applyPlayerEffect}
+        changeCharacterSanity={gameStoreInstance.changeCharacterSanity}
+        addItem={gameStoreInstance.addItem}
+        getNextSceneUrl={sceneStoreInstance.getNextSceneUrl}
+        startFadeOutToBlack={startFadeOutToBlack}
+        characterState={selectedCharacter ?? createDummyCharacterState()}
       />
     </Box>
   );

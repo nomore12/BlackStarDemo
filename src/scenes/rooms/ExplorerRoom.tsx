@@ -17,6 +17,7 @@ import type { DialogSequence } from '../../types/DialogSystemTypes';
 // import { useRoomDialogManager } from '../../hooks/useRoomDialogManager'; // 제거
 import { processSingleOutcome } from '../../utils/outcomeHandlers';
 import { createDummyCharacterState } from '../../utils/characterUtils';
+import { ACTION_ID_NEXT } from '../../constants/dialogConstants'; // ACTION_ID_NEXT 상수 임포트
 
 const ExplorerRoom: React.FC = () => {
   const { startFadeOutToBlack } = usePageTransition();
@@ -44,7 +45,7 @@ const ExplorerRoom: React.FC = () => {
             description:
               '방 안의 낡은 테이블은 기이한 물건들로 가득 차, 마치 광인의 제단과도 같다. 가까이 다가서자 알 수 없는 속삭임이 귓가를 맴도는 듯하고, 테이블 표면에서는 차가운 한기가 스며 나온다. 이 금지된 물건들 사이 어딘가에 내가 찾는 답이 있을지도 모른다는 생각에, 본능적인 공포를 억누르며 조심스럽게 손을 뻗어 잡동사니를 헤집는다.',
             actions: [
-              { id: 's_next', text: '다음', nextStepId: 'choice_table' },
+              { id: ACTION_ID_NEXT, text: '다음', nextStepId: 'choice_table' },
             ],
           },
           choice_table: {

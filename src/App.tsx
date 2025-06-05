@@ -124,7 +124,13 @@ function App() {
           )}
         </div>
         <Snackbar
-          sx={{ zIndex: 10000, position: 'absolute', top: 550, left: 0 }}
+          sx={{
+            zIndex: theme.zIndex.snackbar,
+            position: 'absolute',
+            top: 550,
+            left: 0,
+            pointerEvents: 'none',
+          }}
           open={open}
           autoHideDuration={10000}
           onClose={handleSnackbarClose}

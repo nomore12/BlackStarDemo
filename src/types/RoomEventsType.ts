@@ -102,7 +102,8 @@ export type OutcomeType =
   | 'moveToNextScene'
   | 'openModal'
   | 'customEffect'
-  | 'decreaseSanity';
+  | 'decreaseSanity'
+  | 'decreaseInvestigationPoints';
 // 이전 RoomEventsType.ts에 있던 타입들:
 // | 'playerDies'
 // | 'playAudio'

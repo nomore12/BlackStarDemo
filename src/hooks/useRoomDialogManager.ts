@@ -7,6 +7,7 @@ import type {
 } from '../types/DialogSystemTypes';
 import type { RoomOutcome } from '../types/RoomEventsType';
 import { processSingleOutcome as callProcessSingleOutcomeUtil } from '../utils/outcomeHandlers';
+import { ACTION_ID_NEXT } from '../constants/dialogConstants';
 
 interface UseRoomDialogManagerProps {
   dialogSequences: Record<string, DialogSequence>;
@@ -168,7 +169,7 @@ export const useRoomDialogManager = ({
         );
       }
 
-      if (!action.isDialogEnd && action.id !== 's_next') {
+      if (!action.isDialogEnd && action.id !== ACTION_ID_NEXT) {
         addDialogSelection(dialogState.currentDialogId, action.id);
         setDialogState((prev) => ({
           ...prev,

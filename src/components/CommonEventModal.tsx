@@ -18,6 +18,7 @@ import {
   DialogSystemAction,
   DialogSystemStep,
 } from '../types/DialogSystemTypes'; // 새로운 타입 임포트
+import { ACTION_ID_NEXT } from '../constants/dialogConstants'; // ACTION_ID_NEXT 상수 임포트
 
 interface CommonEventModalProps {
   open: boolean;
@@ -204,7 +205,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
                 selectedActionIds &&
                 selectedActionIds.has(action.id) &&
                 !action.isDialogEnd &&
-                action.id !== 's_next' // 's_next' ID 예외 처리 추가
+                action.id !== ACTION_ID_NEXT // 's_next' ID 예외 처리 추가
               ) {
                 return false;
               }
@@ -309,7 +310,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
               selectedActionIds &&
               selectedActionIds.has(act.id) &&
               !act.isDialogEnd &&
-              act.id !== 's_next' // 's_next' ID 예외 처리 추가
+              act.id !== ACTION_ID_NEXT // 's_next' ID 예외 처리 추가
             ) {
               return false;
             }

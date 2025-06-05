@@ -466,7 +466,7 @@ const FirstHalf07: React.FC = () => {
         },
       },
     }),
-    [] // useMemo 의존성 배열
+    [selectedCharacter] // useMemo 의존성 배열
   );
 
   const handleBookShelfClick = (e: React.MouseEvent<HTMLDivElement>) => {

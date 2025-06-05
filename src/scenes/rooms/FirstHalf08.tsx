@@ -59,26 +59,50 @@ const FirstHalf08: React.FC = () => {
             actions: [
               {
                 id: 'choice_investigate_jar',
-                text: '유리병 속의 기괴한 생물을 조사한다. (조사 포인트 2 소모)',
-                investigationPointsRequired: 2,
+                text: '유리병 속의 기괴한 생물을 조사한다.',
+                investigationPoints: 2,
+                outcomes: [
+                  {
+                    type: 'decreaseInvestigationPoints',
+                    payload: { amount: 2, reason: '유리병 생물 조사' },
+                  },
+                ],
                 nextStepId: 'detail_jar_investigation',
               },
               {
                 id: 'choice_investigate_book',
-                text: '펼쳐진 낡은 책을 조사한다. (조사 포인트 2 소모)',
-                investigationPointsRequired: 2,
+                text: '펼쳐진 낡은 책을 조사한다.',
+                investigationPoints: 2,
+                outcomes: [
+                  {
+                    type: 'decreaseInvestigationPoints',
+                    payload: { amount: 2, reason: '낡은 책 조사' },
+                  },
+                ],
                 nextStepId: 'detail_book_investigation',
               },
               {
                 id: 'choice_investigate_papers',
-                text: '흩어진 종이들을 조사한다. (조사 포인트 1 소모)',
-                investigationPointsRequired: 1,
+                text: '흩어진 종이들을 조사한다.',
+                investigationPoints: 1,
+                outcomes: [
+                  {
+                    type: 'decreaseInvestigationPoints',
+                    payload: { amount: 1, reason: '흩어진 종이 조사' },
+                  },
+                ],
                 nextStepId: 'detail_papers_investigation',
               },
               {
                 id: 'choice_investigate_drawer',
-                text: '책상 서랍을 조사한다. (조사 포인트 2 소모)',
-                investigationPointsRequired: 2,
+                text: '책상 서랍을 조사한다.',
+                investigationPoints: 2,
+                outcomes: [
+                  {
+                    type: 'decreaseInvestigationPoints',
+                    payload: { amount: 2, reason: '책상 서랍 조사' },
+                  },
+                ],
                 nextStepId: 'detail_drawer_investigation',
               },
               {
@@ -310,7 +334,7 @@ const FirstHalf08: React.FC = () => {
         },
       },
     }),
-    []
+    [selectedCharacter]
   );
 
   const handleNoteTableClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -385,10 +409,14 @@ const FirstHalf08: React.FC = () => {
         onCloseDialog={handleCloseDialog}
         applyPlayerEffect={gameStoreInstance.applyPlayerEffect}
         changeCharacterSanity={gameStoreInstance.changeCharacterSanity}
+        changeCharacterInvestigationPoints={
+          gameStoreInstance.changeCharacterInvestigationPoints
+        }
         addItem={gameStoreInstance.addItem}
         getNextSceneUrl={sceneStoreInstance.getNextSceneUrl}
         startFadeOutToBlack={startFadeOutToBlack}
         characterState={selectedCharacter ?? createDummyCharacterState()}
+        resetCharacterAllPoints={gameStoreInstance.resetCharacterAllPoints}
       />
     </Box>
   );

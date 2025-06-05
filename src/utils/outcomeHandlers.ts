@@ -2,6 +2,7 @@ import {
   type RoomOutcome,
   type CustomEffectOutcomePayload,
   type AddItemOutcomePayload,
+  type DecreaseInvestigationPointsOutcomePayload,
 } from '../types/RoomEventsType';
 import type { GameState } from '../store/characterStore';
 import type { SceneStoreState } from '../store/sceneStore';
@@ -9,9 +10,11 @@ import type { SceneStoreState } from '../store/sceneStore';
 interface OutcomeHandlerDependencies {
   applyPlayerEffect: GameState['applyPlayerEffect'];
   changeCharacterSanity: GameState['changeCharacterSanity'];
+  changeCharacterInvestigationPoints: GameState['changeCharacterInvestigationPoints'];
   addItem: GameState['addItem'];
   getNextSceneUrl: SceneStoreState['getNextSceneUrl'];
   startFadeOutToBlack: (path: string, duration: number) => void;
+  resetCharacterAllPoints: GameState['resetCharacterAllPoints'];
 }
 
 export const processSingleOutcome = (
@@ -23,9 +26,11 @@ export const processSingleOutcome = (
   const {
     applyPlayerEffect,
     changeCharacterSanity,
+    changeCharacterInvestigationPoints,
     addItem,
     getNextSceneUrl,
     startFadeOutToBlack,
+    resetCharacterAllPoints,
   } = dependencies;
 
   switch (outcome.type) {
@@ -53,6 +58,10 @@ export const processSingleOutcome = (
       changeCharacterSanity(outcome.payload.amount, outcome.payload.reason);
       break;
     }
+    case 'decreaseInvestigationPoints': {
+      changeCharacterInvestigationPoints(-outcome.payload.amount);
+      break;
+    }
     case 'moveToNextScene': {
       const nextSceneUrl = getNextSceneUrl();
       if (nextSceneUrl.startsWith('/error')) {
@@ -61,6 +70,16 @@ export const processSingleOutcome = (
         );
         alert(`다음 씬 정보를 가져오는 데 실패했습니다: ${nextSceneUrl}`);
       } else {
+        if (resetCharacterAllPoints) {
+          resetCharacterAllPoints();
+          console.log(
+            '[OutcomeHandler] Character points reset due to moveToNextScene.'
+          );
+        } else {
+          console.warn(
+            '[OutcomeHandler] resetCharacterAllPoints function is not provided.'
+          );
+        }
         startFadeOutToBlack(nextSceneUrl, 1000);
       }
       break;

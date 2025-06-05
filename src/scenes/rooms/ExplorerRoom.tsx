@@ -62,6 +62,10 @@ const ExplorerRoom: React.FC = () => {
                     type: 'decreaseSanity',
                     payload: { amount: -10, reason: '끔찍한 광경 목격' },
                   },
+                  {
+                    type: 'decreaseInvestigationPoints',
+                    payload: { amount: 1, reason: '해골 조사' },
+                  },
                 ],
                 nextStepId: 'result_skull',
               },
@@ -69,12 +73,24 @@ const ExplorerRoom: React.FC = () => {
                 id: 's_observe_note',
                 text: '노트를 관찰한다.',
                 investigationPoints: 3,
+                outcomes: [
+                  {
+                    type: 'decreaseInvestigationPoints',
+                    payload: { amount: 3, reason: '노트 조사' },
+                  },
+                ],
                 nextStepId: 'result_note_start',
               },
               {
                 id: 's_check_drawer',
                 text: '테이블 서랍을 살펴본다.',
                 investigationPoints: 2,
+                outcomes: [
+                  {
+                    type: 'decreaseInvestigationPoints',
+                    payload: { amount: 2, reason: '서랍 조사' },
+                  },
+                ],
                 nextStepId: 'drawer_interaction_start_unique',
               },
               {
@@ -361,18 +377,18 @@ const ExplorerRoom: React.FC = () => {
         },
       },
     }),
-    []
+    [selectedCharacter]
   );
 
   const handleSkullTableClick = (e: React.MouseEvent<HTMLDivElement>) => {
     console.log('handleSkullTableClick');
     e.stopPropagation();
-    setActiveDialogId('skullAndNote'); // 상태 업데이트로 변경
+    setActiveDialogId('skullAndNote');
   };
 
   const handleDoorClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    setActiveDialogId('doorInteraction'); // 상태 업데이트로 변경
+    setActiveDialogId('doorInteraction');
   };
 
   const handleCloseDialog = () => {
@@ -436,10 +452,14 @@ const ExplorerRoom: React.FC = () => {
         onCloseDialog={handleCloseDialog}
         applyPlayerEffect={gameStoreInstance.applyPlayerEffect}
         changeCharacterSanity={gameStoreInstance.changeCharacterSanity}
+        changeCharacterInvestigationPoints={
+          gameStoreInstance.changeCharacterInvestigationPoints
+        }
         addItem={gameStoreInstance.addItem}
         getNextSceneUrl={sceneStoreInstance.getNextSceneUrl}
         startFadeOutToBlack={startFadeOutToBlack}
         characterState={selectedCharacter ?? createDummyCharacterState()}
+        resetCharacterAllPoints={gameStoreInstance.resetCharacterAllPoints}
       />
     </Box>
   );

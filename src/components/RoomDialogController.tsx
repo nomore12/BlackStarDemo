@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useGameStore } from '../store/characterStore';
+import { GameState, useGameStore } from '../store/characterStore';
 import { useRoomDialogManager } from '../hooks/useRoomDialogManager';
 import CommonEventModal from './CommonEventModal';
 import type { DialogSequence } from '../types/DialogSystemTypes';
@@ -9,17 +9,13 @@ interface RoomDialogControllerProps {
   dialogSequences: Record<string, DialogSequence>;
   activeDialogId: string | null;
   onCloseDialog: () => void;
-  applyPlayerEffect: (effect: {
-    hpChange?: number;
-    sanityChange?: number;
-    message?: string;
-    reason?: string;
-    newItemId?: string;
-    newItemName?: string;
-    newItemDescription?: string;
-    [key: string]: unknown;
-  }) => void;
+  applyPlayerEffect: GameState['applyPlayerEffect'];
   changeCharacterSanity: (
+    amount: number,
+    reason?: string,
+    characterId?: string
+  ) => void;
+  changeCharacterInvestigationPoints: (
     amount: number,
     reason?: string,
     characterId?: string
@@ -28,6 +24,7 @@ interface RoomDialogControllerProps {
   getNextSceneUrl: () => string | undefined;
   startFadeOutToBlack: (path: string, duration?: number) => void;
   characterState: CharacterState | null;
+  resetCharacterAllPoints: GameState['resetCharacterAllPoints'];
 }
 
 const RoomDialogController: React.FC<RoomDialogControllerProps> = ({
@@ -36,10 +33,12 @@ const RoomDialogController: React.FC<RoomDialogControllerProps> = ({
   onCloseDialog,
   applyPlayerEffect,
   changeCharacterSanity,
+  changeCharacterInvestigationPoints,
   addItem,
   getNextSceneUrl,
   startFadeOutToBlack,
   characterState,
+  resetCharacterAllPoints,
 }) => {
   const addDialogSelectionToStore = useGameStore(
     (state) => state.addDialogSelection
@@ -63,9 +62,11 @@ const RoomDialogController: React.FC<RoomDialogControllerProps> = ({
     onDialogShouldCloseByAction: onCloseDialog,
     applyPlayerEffect,
     changeCharacterSanity,
+    changeCharacterInvestigationPoints,
     addItem,
     getNextSceneUrl,
     startFadeOutToBlack,
+    resetCharacterAllPoints,
   });
 
   useEffect(() => {

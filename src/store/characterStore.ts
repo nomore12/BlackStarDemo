@@ -336,10 +336,13 @@ export const useGameStore = create<GameState>()(
                 0,
                 state.selectedCharacter.currentInvestigationPoints + delta
               );
+              console.log(
+                `[Investigation Points Change] Amount: ${delta}, New: ${newVal}, Max: ${state.selectedCharacter.maxInvestigationPoints}`
+              );
               return {
                 selectedCharacter: {
                   ...state.selectedCharacter,
-                  investigationPoints: newVal,
+                  currentInvestigationPoints: newVal,
                 },
               };
             }

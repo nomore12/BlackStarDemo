@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { CharacterState, useGameStore } from '../store/characterStore';
 import { useSceneStore, SceneStoreState } from '../store/sceneStore';
+import { useSnackbarStore } from '../store/uiStore'; // 스낵바 스토어 추가
 import { CombinedGameAndSceneState } from '../types/RoomEventsType'; // CombinedGameAndSceneState는 유지
 import {
   DialogSystemAction,
@@ -51,6 +52,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
   const characterState = useGameStore.getState().selectedCharacter;
   const gameStoreState = useGameStore.getState();
   const sceneStoreState = useSceneStore.getState();
+  const showSnackbar = useSnackbarStore.getState().showSnackbar; // 스낵바 함수 가져오기
 
   const [displayedDescription, setDisplayedDescription] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -217,6 +219,11 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
                 return null;
               }
 
+              const requiredPoints = action.investigationPoints || 0;
+              const currentPoints =
+                characterState?.currentInvestigationPoints || 0;
+              const canPerformAction = currentPoints >= requiredPoints;
+
               return (
                 <Button
                   key={action.id || `action-${index}`}
@@ -225,19 +232,72 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
                     if (isTyping) {
                       setDisplayedDescription(descriptionText);
                       setIsTyping(false);
-                    } else {
-                      onDialogActionSelect(action);
+                      return; // 타이핑 중에는 액션 처리 안 함
                     }
+
+                    if (requiredPoints > 0 && !canPerformAction) {
+                      showSnackbar(
+                        `조사 포인트가 부족합니다. (필요: ${requiredPoints}, 현재: ${currentPoints})`,
+                        'warning'
+                      );
+                      return;
+                    }
+                    onDialogActionSelect(action);
                   }}
                   fullWidth
                   color="inherit"
                   sx={{
-                    borderColor: '#777',
-                    '&:hover': { borderColor: '#ccc' },
+                    borderColor: canPerformAction ? '#777' : '#555', // 포인트 부족 시 더 어둡게
+                    opacity: canPerformAction ? 1 : 0.6, // 포인트 부족 시 투명도
+                    '&:hover': {
+                      borderColor: canPerformAction ? '#ccc' : '#555',
+                    },
                     fontFamily: 'Hahmlet',
-                  }} // 글꼴 일관성
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
                 >
-                  {action.text}
+                  <Box
+                    component="span"
+                    sx={{
+                      textAlign: 'center',
+                      marginRight: requiredPoints > 0 ? '8px' : '0px',
+                    }}
+                  >
+                    {action.text}
+                  </Box>
+                  {requiredPoints > 0 && (
+                    <Box
+                      component="span"
+                      sx={{ display: 'flex', alignItems: 'center' }}
+                    >
+                      ( {/* 여는 괄호 */}
+                      {Array.from({ length: requiredPoints }).map((_, i) => (
+                        <Box
+                          key={i}
+                          component="span"
+                          sx={{
+                            width: 12,
+                            height: 12,
+                            // 현재 포인트가 해당 원보다 많거나 같으면 채움, 아니면 테두리만
+                            backgroundColor:
+                              currentPoints >= i + 1
+                                ? canPerformAction
+                                  ? '#fff'
+                                  : '#777'
+                                : 'transparent',
+                            border: `1px solid ${canPerformAction ? '#fff' : '#777'}`,
+                            borderRadius: '50%',
+                            marginLeft: '4px',
+                            display: 'inline-block',
+                            flexShrink: 0,
+                          }}
+                        />
+                      ))}
+                      ) {/* 닫는 괄호 */}
+                    </Box>
+                  )}
                 </Button>
               );
             })}
@@ -253,9 +313,10 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
             ) {
               return false;
             }
-            return act.condition
+            const isActVisible = act.condition
               ? act.condition(characterState, combinedGameState)
               : true;
+            return isActVisible; // 이 필터는 visibility만 체크
           }).length === 0 && (
             <Button
               onClick={onClose}

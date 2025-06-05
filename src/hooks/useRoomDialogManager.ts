@@ -30,9 +30,15 @@ interface UseRoomDialogManagerProps {
     reason?: string,
     characterId?: string
   ) => void;
+  changeCharacterInvestigationPoints: (
+    amount: number,
+    reason?: string,
+    characterId?: string
+  ) => void;
   addItem: (item: Item, characterId?: string) => void;
   getNextSceneUrl: () => string | undefined;
   startFadeOutToBlack: (path: string, duration?: number) => void;
+  resetCharacterAllPoints: GameState['resetCharacterAllPoints'];
 }
 
 export const useRoomDialogManager = ({
@@ -44,9 +50,11 @@ export const useRoomDialogManager = ({
   onDialogShouldCloseByAction,
   applyPlayerEffect,
   changeCharacterSanity,
+  changeCharacterInvestigationPoints,
   addItem,
   getNextSceneUrl,
   startFadeOutToBlack,
+  resetCharacterAllPoints,
 }: UseRoomDialogManagerProps) => {
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean;
@@ -145,10 +153,17 @@ export const useRoomDialogManager = ({
             applyPlayerEffect: applyPlayerEffect,
             changeCharacterSanity: (amount: number, reason?: string) =>
               changeCharacterSanity(amount, reason, characterState?.id),
+            changeCharacterInvestigationPoints: (amount: number) =>
+              changeCharacterInvestigationPoints(
+                amount,
+                undefined,
+                characterState?.id
+              ),
             addItem: (itemPayload: Item) =>
               addItem(itemPayload, characterState?.id),
             getNextSceneUrl: () => getNextSceneUrl() || '',
             startFadeOutToBlack: startFadeOutToBlack,
+            resetCharacterAllPoints: resetCharacterAllPoints,
           })
         );
       }
@@ -198,9 +213,11 @@ export const useRoomDialogManager = ({
       onDialogShouldCloseByAction,
       applyPlayerEffect,
       changeCharacterSanity,
+      changeCharacterInvestigationPoints,
       addItem,
       getNextSceneUrl,
       startFadeOutToBlack,
+      resetCharacterAllPoints,
       characterState,
     ]
   );

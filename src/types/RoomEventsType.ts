@@ -85,6 +85,11 @@ export interface DecreaseSanityOutcomePayload {
   reason?: string; // (선택적) 정신력 감소 이유 로그용
 }
 
+export interface DecreaseInvestigationPointsOutcomePayload {
+  amount: number; // 감소시킬 조사 포인트의 양 (양수로 전달하고, 처리 시 음수로 변환)
+  reason?: string; // (선택적) 조사 포인트 감소 이유 로그용
+}
+
 // --- RoomOutcome 타입 (Discriminated Union) ---
 // OutcomeType 정의는 이전 RoomEventsType.ts 버전을 참고하여 좀 더 포괄적으로 만들 수 있으나,
 // 우선 RoomEventsType.d.ts 에 정의된 타입들로 구성합니다.
@@ -191,6 +196,15 @@ export type RoomOutcome =
   | {
       type: 'decreaseSanity';
       payload: DecreaseSanityOutcomePayload;
+      condition?: (
+        characterState: CharacterState | null | undefined,
+        gameState: CombinedGameAndSceneState,
+        skillCheckResult?: SkillCheckResult
+      ) => boolean;
+    }
+  | {
+      type: 'decreaseInvestigationPoints';
+      payload: DecreaseInvestigationPointsOutcomePayload;
       condition?: (
         characterState: CharacterState | null | undefined,
         gameState: CombinedGameAndSceneState,

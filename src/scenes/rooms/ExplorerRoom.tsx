@@ -1,38 +1,23 @@
 // src/scenes/rooms/ExplorerRoom.tsx
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
-
 import { useSceneStore } from '../../store/sceneStore';
-import {
-  useGameStore,
-  // CharacterState, // characterState 직접 사용하지 않으므로 제거 가능
-} from '../../store/characterStore';
+import { useGameStore } from '../../store/characterStore';
 import { usePageTransition } from '../../contexts/PageTransitionContext';
-// import CommonEventModal from '../../components/CommonEventModal'; // 제거
 import CharacterLoadingPlaceholder from '../../components/CharacterLoadingPlaceholder';
-import RoomDialogController from '../../components/RoomDialogController'; // 새로 추가
-
-import type { RoomOutcome } from '../../types/RoomEventsType';
+import RoomDialogController from '../../components/RoomDialogController';
 import type { DialogSequence } from '../../types/DialogSystemTypes';
-// import { useRoomDialogManager } from '../../hooks/useRoomDialogManager'; // 제거
-import { processSingleOutcome } from '../../utils/outcomeHandlers';
 import { createDummyCharacterState } from '../../utils/characterUtils';
-import { ACTION_ID_NEXT } from '../../constants/dialogConstants'; // ACTION_ID_NEXT 상수 임포트
+import { ACTION_ID_NEXT } from '../../constants/dialogConstants';
 
 const ExplorerRoom: React.FC = () => {
   const { startFadeOutToBlack } = usePageTransition();
   const gameStoreInstance = useGameStore();
   const sceneStoreInstance = useSceneStore();
 
-  // RoomDialogController를 위한 상태
   const [activeDialogId, setActiveDialogId] = useState<string | null>(null);
 
-  // characterState는 RoomDialogController 내부 또는 CommonEventModal 내부에서 가져오므로
-  // 여기서 selectedCharacter를 직접 확인하는 로직은 유지 (로딩 플레이스홀더용)
   const selectedCharacter = useGameStore((state) => state.selectedCharacter);
-  // RoomDialogController에 characterState를 직접 넘기지 않으므로, 아래 characterState 변수는 여기서 불필요해짐
-  // const characterStateForDialogManager =
-  //   selectedCharacter ?? createDummyCharacterState();
 
   const roomDialogs: Record<string, DialogSequence> = useMemo(
     () => ({

@@ -1,17 +1,15 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSceneStore } from '../../store/sceneStore';
 import { usePageTransition } from '../../contexts/PageTransitionContext';
-import { Box, Button, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import type { DialogSequence } from '../../types/DialogSystemTypes';
-import type { RoomOutcome } from '../../types/RoomEventsType';
 import { useGameStore } from '../../store/characterStore';
 import CharacterLoadingPlaceholder from '../../components/CharacterLoadingPlaceholder';
 import RoomDialogController from '../../components/RoomDialogController';
-import { processSingleOutcome } from '../../utils/outcomeHandlers';
 import { createDummyCharacterState } from '../../utils/characterUtils';
+import { ACTION_ID_NEXT } from '../../constants/dialogConstants';
 
 const FirstHalf08: React.FC = () => {
-  const { getNextSceneUrl } = useSceneStore();
   const { startFadeOutToBlack } = usePageTransition();
   const gameStoreInstance = useGameStore();
   const sceneStoreInstance = useSceneStore();
@@ -33,7 +31,7 @@ const FirstHalf08: React.FC = () => {
               '낡은 나무 책상 위는 온통 기괴한 물건들로 가득하다. 유리병 속의 섬뜩한 생물, 수상한 내용이 적힌 듯한 펼쳐진 책과 흩어진 종이들, 그리고 굳게 닫힌 서랍까지... 무엇부터 조사해야 할까? 모든 것을 다 살펴볼 시간은 없을 것 같다.',
             actions: [
               {
-                id: 'go_to_choice_table_IP',
+                id: ACTION_ID_NEXT,
                 text: '조사를 시작한다...',
                 nextStepId: 'choice_table_IP',
               },

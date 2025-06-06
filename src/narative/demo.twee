@@ -1,0 +1,459 @@
+:: Start
+title: 데모 시작 지점
+당신은 낡은 저택의 복도에 서 있다. 어느 방부터 조사하시겠습니까?
+
+* [[탐험가 전용 방 (해골과 노트)->start-skull-and-note]]
+* [[쓰레기 더미가 있는 방->start-trash-observation]]
+* [[아이의 방 (인형)->start-doll-observation]]
+* [[아이의 방 (그림)->start-drawing-analysis]]
+* [[추종자를 만나는 방->start-fanatic-encounter]]
+* [[고대의 서재->start-library-observation]]
+* [[오래된 책상이 있는 방->start-table-observation]]
+
+/% 
+---
+이 'Start' Passage는 Twine에서 이야기의 시작점으로 작동합니다.
+실제 게임에서는 sceneStore의 랜덤 로직에 따라 각 방으로 바로 이동하게 되므로,
+이 부분은 Twine에서의 흐름 테스트 및 확인용 허브(Hub)로 사용하시면 됩니다.
+---
+%/
+
+
+/% -------------------------------------------------- %/
+/% --- From: ExplorerRoom.tsx (탐험가 전용 방) --- %/
+/% -------------------------------------------------- %/
+
+:: start-skull-and-note [skullAndNote]
+방 안의 낡은 테이블은 기이한 물건들로 가득 차, 마치 광인의 제단과도 같다. 가까이 다가서자 알 수 없는 속삭임이 귓가를 맴도는 듯하고, 테이블 표면에서는 차가운 한기가 스며 나온다. 이 금지된 물건들 사이 어딘가에 내가 찾는 답이 있을지도 모른다는 생각에, 본능적인 공포를 억누르며 조심스럽게 손을 뻗어 잡동사니를 헤집는다.
+
+* [[다음->choice-table]]
+
+:: choice-table [skullAndNote]
+title: 해골과 펼쳐져 있는 낡은 노트, 그리고 서랍
+
+섬뜩한 해골과 그 해골이 지키는 낡은 노트. 그 안의 이야기는 분명 위험하지만, 참을 수 없이 궁금해진다. 테이블 한쪽에는 작은 서랍도 보인다.
+
+* (결과: 이성 -10, IP -1) [[해골을 관찰한다. [조사 포인트 1]->result-skull]]
+* (결과: IP -3) [[노트를 관찰한다. [조사 포인트 3]->result-note-start]]
+* (결과: IP -2) [[테이블 서랍을 살펴본다. [조사 포인트 2]->drawer-interaction-start-unique]]
+* [[테이블 조사를 그만둔다.]] (-> 다이얼로그 종료)
+
+:: result-skull [skullAndNote]
+title: 해골을 관찰한다.
+
+눈앞의 해골, 그 눈구멍은 공허하지 않았다. 역겨운 벌레가 꿈틀대며 기어 나왔고, 그것은 본능적으로 나의 가장 취약한 곳, 눈을 향해 날아들었다. 숨 막히는 공포에 눈을 감았다 뜨자, 해골의 눈에서 뿜어져 나온 빛만이 잔상처럼 남았을 뿐, 벌레는 사라지고 없었다. 정말 사라진 걸까?
+
+* [[확인 (테이블 조사 처음으로)->choice-table]]
+* [[탐색 종료]] (-> 다이얼로그 종료)
+
+:: result-note-start [skullAndNote]
+title: 낡은 노트를 읽어본다.
+
+한 자 한 자, 익숙하지만 어딘가 뒤틀린 필체. 설마 하는 마음에 동생 사진 뒷면의 메모와 대조했다. 틀림없는 릴리의 글씨였다.
+
+첫 장은 릴리가 저택에 처음 도착했을 때의 호기심과 약간의 두려움이 담겨 있었다. "이곳은 뭔가 특별해. 벽 너머에서 이상한 소리가 들리지만, 나쁜 느낌은 아니야."
+
+* [[계속 읽는다...->result-note-middle]]
+* (결과: 텍스트 출력) [[그만 읽는다.]] (-> 다이얼로그 종료)
+
+:: result-note-middle [skullAndNote]
+title: 계속해서 노트를 읽는다...
+
+페이지를 넘길수록, 내용은 점차 기괴하게 변해갔다. 알아볼 수 없는 기호들이 글자 사이를 파고들고, 평범했던 그림들은 점차 끔찍한 형상으로 변해 있었다. 릴리의 순수했던 문장들은 점차 광적인 열망으로 가득 찼다.
+
+"그분들이 내게 말을 걸어와. 별들의 언어로 속삭여. 처음엔 무서웠지만, 이젠... 아름답게 느껴져. 내 몸이 변하는 것 같아. 새로운 눈이 생기고, 새로운 목소리가 들려와. 이건 축복이야!"
+
+* (결과: 이성 -5) [[마지막 장을 확인한다.->result-note-end]]
+* (결과: 이성 -5, 텍스트 출력) [[더는 못 읽겠다.]] (-> 다이얼로그 종료)
+
+:: result-note-end [skullAndNote]
+title: 노트의 마지막 장...
+
+(캐릭터 상태에 따라 내용 변경됨)
+마지막 장에는 피로 보이는 검붉은 얼룩과 함께, 거의 해독 불가능할 정도로 뒤틀린 글씨로 단 한 문장만이 갈겨져 있었다.
+
+"오빠... 모든 것이 연결되어 있어. 곧 만나게 될 거야... 이면에서. 나처럼... 아름답게..."
+
+그 아래에는, 알아볼 수 없는 존재, 마치 꿈틀거리는 그림자 같은 형상이 그려져 있었다. 그것이 릴리라고는 믿고 싶지 않았다.
+
+이것은 더 이상 희망의 단서가 아니었다. 동생이 이미 돌아올 수 없는 강을 건넜다는, 끔찍한 현실을 알리는 경고장이었다.
+
+* (결과: 이성 -10, 커스텀이펙트) [[릴리는... 이미...]] (-> 다이얼로그 종료)
+* (결과: 이성 -10) [[테이블 조사를 계속한다.->choice-table]]
+
+:: drawer-interaction-start-unique [skullAndNote]
+title: 테이블 서랍
+
+테이블 아래의 낡은 서랍. 손잡이에 희미하게나마 별 모양 문양이 새겨져 있는 것 같다.
+
+* [[조심스럽게 서랍을 열어본다.->drawer-contents-reveal-unique]]
+* [[수상해 보인다. 건드리지 말자.->choice-table]]
+
+:: drawer-contents-reveal-unique [skullAndNote]
+title: 서랍 속 내용물
+image: images/letterNstone.png
+
+서랍 안쪽 바닥에는 빛바랜 편지 한 통과 함께, 작고 검은 돌멩이가 놓여 있다. 돌멩이는 이상할 정도로 차갑고, 가만히 귀 기울이면 희미한 속삭임 같은 것이 들려오는 듯하다.
+
+* [[빛바랜 편지를 읽는다.->drawer-letter-content-unique]]
+* (결과: 이성 -5, 텍스트 출력) [[검은 돌멩이를 만져본다.->drawer-contents-reveal-unique]]
+* (결과: 아이템 추가, 텍스트 출력) [[모두 챙긴다.->choice-table]]
+* [[서랍을 다시 닫는다.->choice-table]]
+
+:: drawer-letter-content-unique [skullAndNote]
+title: 빛바랜 편지 (서랍)
+
+(캐릭터 상태에 따라 내용 변경됨)
+편지는 거의 해독하기 어려울 정도로 낡았지만, 몇몇 단어는 간신히 알아볼 수 있었다.
+
+"...별들이 정렬될 때...", "...문이 열리리라...", 그리고 마지막엔 피로 보이는 얼룩과 함께 "...그녀를 막아야 해..." 라는 글자가 적혀있었다.
+
+* (결과: 이성 -3) [[알 수 없는 불안감이 엄습한다.->drawer-contents-reveal-unique]]
+
+
+/% -------------------------------------------------- %/
+/% --- From: FirstHalf05.tsx (쓰레기 더미 방) --- %/
+/% -------------------------------------------------- %/
+
+:: start-trash-observation [trashInvestigation]
+title: 역겨운 쓰레기 더미
+image: images/trash.png
+
+방 한구석에 산처럼 쌓인 쓰레기 더미에서 시큼한 악취가 진동한다. 음식물 찌꺼기와 정체불명의 오물 사이로 바퀴벌레가 기어 다니고, 살아있는 쥐 한 마리가 무언가를 갉아먹고 있다. 이런 곳에 무언가 단서가 있을 리 없겠지만...
+
+* [[쓰레기 더미를 조사한다.->detail-trash-main-choices-IP]]
+* [[가까이 가고 싶지 않다.]] (-> 다이얼로그 종료)
+
+:: detail-trash-main-choices-IP [trashInvestigation]
+title: 쓰레기 더미 조사 방식 선택
+image: images/trash.png
+
+이 역겨운 더미를 어떻게 조사하시겠습니까? (학자: 6 IP, 탐험가: 4 IP 전체 공유)
+
+* [[흩어진 종이 조각들을 살펴본다. [조사 포인트 1]->sub-detail-trash-papers]]
+* [[살아있는 쥐의 행동을 관찰한다. [조사 포인트 2]->sub-detail-trash-rat]]
+* [[쓰레기 더미 전체를 뒤져본다. (위험 감수) [조사 포인트 4]->sub-detail-trash-rummage]]
+* [[쓰레기 더미 조사를 마친다.]] (-> 다이얼로그 종료)
+
+:: sub-detail-trash-papers [trashInvestigation]
+title: 종이 조각 살펴보기
+
+오물에 젖은 종이 조각들을 조심스럽게 집어 들어 내용을 확인한다.
+
+* (결과: 텍스트 출력) [[얼룩진 글씨를 읽어본다.->detail-trash-main-choices-IP]]
+* (결과: 텍스트 출력) [[다른 종이 조각을 확인한다.->detail-trash-main-choices-IP]]
+
+:: sub-detail-trash-rat [trashInvestigation]
+title: 쥐 관찰하기
+
+쓰레기 더미를 파헤치고 있는 쥐를 멀리서 조용히 지켜본다.
+
+* (결과: 텍스트 출력) [[쥐의 외형을 자세히 본다.->sub-detail-rat-choice-after-observation]]
+* (결과: 텍스트 출력) [[쥐를 쫓아내고 그 자리를 살펴본다.->detail-trash-main-choices-IP]]
+
+:: sub-detail-rat-choice-after-observation [trashInvestigation]
+title: 볼록한 배의 쥐
+
+쥐의 배는 확실히 이상하다. 반짝이는 무언가를 삼킨 것일지도 모른다. 어떻게 할까?
+
+* (결과: 텍스트 출력, 이성 -10) [[쥐를 잡아 배를 갈라 내용물을 확인한다. (잔혹한 선택)->detail-trash-main-choices-IP]]
+* (결과: 텍스트 출력) [[찝찝하다. 그냥 내버려 둔다.->detail-trash-main-choices-IP]]
+
+:: sub-detail-trash-rummage [trashInvestigation]
+title: 쓰레기 더미 수색
+
+역한 냄새를 참아내며 쓰레기 더미를 손으로 직접 파헤치기 시작한다.
+
+* (결과: 텍스트 출력, 이성 -3) [[더미 위쪽을 조심스럽게 뒤진다.->detail-trash-main-choices-IP]]
+* (결과: 텍스트 출력, 이성 -7) [[더미 깊숙한 곳까지 손을 넣어 뒤진다.->detail-trash-main-choices-IP]]
+
+
+/% -------------------------------------------------- %/
+/% --- From: FirstHalf06.tsx (아이의 방) --- %/
+/% -------------------------------------------------- %/
+
+:: start-doll-observation [dollInvestigation]
+title: 침대 위의 낡은 인형
+image: images/dollandbed.jpg
+
+침대 위에 누군가의 흔적처럼 놓여있는 낡은 인형이 당신을 응시하고 있다. 단추로 된 눈이 어둠 속에서 희미하게 빛나며, 마치 살아있는 것처럼 당신의 움직임을 따라가는 것 같다. 이 인형을 조사해 보시겠습니까?
+
+* [[인형을 조사한다.->detail-doll-main-choices-IP]]
+* [[아니, 건드리지 않겠다.]] (-> 다이얼로그 종료)
+
+:: detail-doll-main-choices-IP [dollInvestigation]
+title: 인형 조사 방식 선택
+image: images/dollandbed.jpg
+
+인형을 어떤 방식으로 조사하시겠습니까? (학자: 6 IP, 탐험가: 4 IP 전체 공유)
+
+* [[인형의 겉모습과 주변을 살펴본다. [조사 포인트 1]->sub-detail-doll-observe-appearance]]
+* [[인형을 직접 만져보고, 옷이나 숨겨진 부분을 확인한다. [조사 포인트 2]->sub-detail-doll-touch-and-check]]
+* [[인형의 눈을 똑바로 쳐다보며 말을 걸어본다. [조사 포인트 3]->sub-detail-doll-stare-and-talk]]
+* [[인형 조사를 마친다.]] (-> 다이얼로그 종료)
+
+:: sub-detail-doll-observe-appearance [dollInvestigation]
+title: 인형 겉모습 관찰
+
+인형의 외형과 침대 주변을 자세히 살펴본다.
+
+* (결과: 텍스트 출력, 이성 -1) [[인형 목의 얼룩을 자세히 본다.->detail-doll-main-choices-IP]]
+* (결과: 텍스트 출력) [[인형이 놓인 침대의 상태를 본다.->detail-doll-main-choices-IP]]
+
+:: sub-detail-doll-touch-and-check [dollInvestigation]
+title: 인형 만져보기
+
+인형을 들어 옷 속이나 다른 부분을 만져본다.
+
+* (결과: 텍스트 출력) [[인형의 옷 속을 더듬어본다.->detail-doll-main-choices-IP]]
+* (결과: 텍스트 출력) [[인형의 머리카락이나 팔다리 관절을 살펴본다.->detail-doll-main-choices-IP]]
+
+:: sub-detail-doll-stare-and-talk [dollInvestigation]
+title: 인형과 교감 시도
+
+인형의 단추 눈을 똑바로 마주 본다.
+
+* (결과: 텍스트 출력, 이성 -5) [[조용히 인형에게 말을 걸어본다.->detail-doll-main-choices-IP]]
+* (결과: 텍스트 출력, 이성 -7) [[인형의 눈을 통해 무언가를 보려고 집중한다.->detail-doll-main-choices-IP]]
+
+:: start-drawing-analysis [drawingInvestigation]
+title: 아이의 그림
+image: images/picturefromkid.jpg
+
+벽에 걸린 아이의 그림은 마치 악몽에서 튀어나온 듯한 기괴한 형상들로 가득하다. 이 그림을 조사해 보시겠습니까?
+
+* [[그림을 분석한다.->detail-drawing-main-choices-IP]]
+* [[아니, 보고 싶지 않다.]] (-> 다이얼로그 종료)
+
+:: detail-drawing-main-choices-IP [drawingInvestigation]
+title: 그림 분석 방식 선택
+image: images/picturefromkid.jpg
+
+그림을 어떤 방식으로 분석하시겠습니까? (학자: 6 IP, 탐험가: 4 IP 전체 공유)
+
+* [[그림의 전체적인 형태와 사용된 색깔을 파악한다. [조사 포인트 1]->sub-detail-drawing-identify-shapes]]
+* [[그림 중 특정 부분(예: 문, 촉수, 눈)을 집중적으로 관찰한다. [조사 포인트 2]->sub-detail-drawing-focus-on-parts]]
+* [[그림 뒷면이나 액자틀에 다른 단서가 있는지 확인한다. [조사 포인트 2]->sub-detail-drawing-check-backside]]
+* [[그림 분석을 마친다.]] (-> 다이얼로그 종료)
+
+:: sub-detail-drawing-identify-shapes [drawingInvestigation]
+title: 그림 형태 및 색깔 파악
+
+그림의 전체적인 구도와 색 사용을 통해 아이의 심리나 그림의 의미를 추론해본다.
+
+* (결과: 텍스트 출력, 이성 -2) [[주요 형체들의 상징성을 생각해본다.->detail-drawing-main-choices-IP]]
+* (결과: 텍스트 출력) [[색 사용의 의미를 분석한다.->detail-drawing-main-choices-IP]]
+
+:: sub-detail-drawing-focus-on-parts [drawingInvestigation]
+title: 그림 특정 부분 관찰
+
+그림에서 유독 눈에 띄거나 중요해 보이는 부분을 자세히 들여다본다.
+
+* (결과: 텍스트 출력) [[중앙의 문을 자세히 본다.->detail-drawing-main-choices-IP]]
+* (결과: 텍스트 출력, 이성 -3) [[겁에 질린 작은 형체들을 자세히 본다.->detail-drawing-main-choices-IP]]
+
+:: sub-detail-drawing-check-backside [drawingInvestigation]
+title: 그림 뒷면 및 액자 확인
+
+그림을 벽에서 떼어내어 뒷면이나 액자 자체에 숨겨진 것이 있는지 살펴본다.
+
+* (결과: 텍스트 출력) [[그림 뒷면에 적힌 글씨를 확인한다.->detail-drawing-main-choices-IP]]
+* (결과: 텍스트 출력) [[액자틀을 분해하거나 틈새를 살펴본다.->detail-drawing-main-choices-IP]]
+
+
+/% -------------------------------------------------- %/
+/% --- From: FirstHalf04.tsx (추종자 조우) --- %/
+/% -------------------------------------------------- %/
+
+:: start-fanatic-encounter [fanaticEncounter]
+title: 검은 로브의 추종자
+image: images/fanatic.png
+
+방 한가운데, 검은 로브를 뒤집어쓴 인물이 미동도 없이 서 있다. 그의 얼굴은 그림자에 가려 보이지 않지만, 당신을 향한 차가운 시선이 느껴진다.
+
+* [[그에게 말을 건다.->detail-fanatic-main-choices-IP]]
+* [[그를 무시하고 조용히 지나간다.]] (-> 다이얼로그 종료)
+
+:: detail-fanatic-main-choices-IP [fanaticEncounter]
+title: 접근 방식 선택
+image: images/fanatic.png
+
+그에게 어떻게 접근하시겠습니까? (학자: 6 IP, 탐험가: 4 IP 전체 공유)
+
+* [[그가 믿는 존재에 대해 아는 척하며 떠본다. [조사 포인트 2]->sub-detail-fanatic-bluff]]
+* [[그를 회유하거나 설득하여 정보를 얻으려 시도한다. [조사 포인트 2]->sub-detail-fanatic-persuade]]
+* [[그를 협박하여 강제로 정보를 털어놓게 한다. [조사 포인트 3]->sub-detail-fanatic-threaten]]
+* [[대화를 그만둔다.]] (-> 다이얼로그 종료)
+
+:: sub-detail-fanatic-bluff [fanaticEncounter]
+title: 아는 척 떠보기
+
+당신은 조심스럽게 그의 믿음에 대해 아는 척하며 대화를 시작한다.
+
+* (결과: 텍스트 출력) [['저 또한 '검은 별'의 인도를 받은 자입니다.'->detail-fanatic-main-choices-IP]]
+* (결과: 텍스트 출력, 이성 -2) [['곧 '문'이 열릴 시간이 다가오지 않았습니까?'->detail-fanatic-main-choices-IP]]
+
+:: sub-detail-fanatic-persuade [fanaticEncounter]
+title: 회유 및 설득
+
+당신은 이성적인 대화를 통해 그에게서 정보를 얻어내려 한다.
+
+* (결과: 텍스트 출력) [['당신도 한때는 다른 삶을 살지 않았습니까? 어쩌다 이렇게 된 거죠?'->detail-fanatic-main-choices-IP]]
+* (결과: 텍스트 출력, HP -15) [['그런 헛된 것을 믿다니, 어리석군요. 현실을 직시하십시오.'->detail-fanatic-main-choices-IP]]
+
+:: sub-detail-fanatic-threaten [fanaticEncounter]
+title: 협박하기
+
+당신은 그를 힘으로 굴복시켜 정보를 캐내기로 결심했다.
+
+* (결과: 텍스트 출력) [['당신들의 '의식'과 '제물'에 대해 알고 있다. 방해받고 싶지 않다면 아는 것을 전부 말해라.'->detail-fanatic-main-choices-IP]]
+* (결과: 텍스트 출력, HP -20) [['조용히 따르는 게 좋을 거다. 다치기 싫으면.' (무기를 꺼내 보인다)->detail-fanatic-main-choices-IP]]
+
+
+/% -------------------------------------------------- %/
+/% --- From: FirstHalf07.tsx (도서관) --- %/
+/% -------------------------------------------------- %/
+
+:: start-library-observation [libraryExploration]
+title: 고대의 서재
+image: images/books.jpg
+
+먼지와 시간의 무게가 느껴지는 책장이다. 수많은 고서들이 금방이라도 바스러질 듯 위태롭게 꽂혀 있다.
+
+* [[책 조사를 시작한다...->choice-book-IP]]
+* (결과: 텍스트 출력) [[이곳의 책들은 건드리지 않는 것이 좋겠다.]] (-> 다이얼로그 종료)
+
+:: choice-book-IP [libraryExploration]
+title: 어떤 책을 조사할까?
+
+선반 위의 책들 중 어떤 것을 먼저 조사하시겠습니까?
+
+* [['별들의 속삭임과 티끌 같은 인간 군상' (시집) [조사 포인트 1]->detail-book-whispers-of-stars]]
+* [['잊혀진 의식과 제물에 관한 소고' (연구서) [조사 포인트 2]->detail-book-forgotten-rituals]]
+* [['킹스포트 항구 이면사' (지역 역사서) [조사 포인트 2]->detail-book-kingsport-history]]
+* [['월족 언어 해독 시론' (언어학 서적) [조사 포인트 3]->detail-book-lunar-dialect]]
+* [['네크로노미콘' (검은 가죽의 두꺼운 책) [조사 포인트 4]->detail-book-necronomicon]]
+* [[책 조사를 마친다.]] (-> 다이얼로그 종료)
+
+:: detail-book-whispers-of-stars [libraryExploration]
+title: '별들의 속삭임과 티끌 같은 인간 군상'
+description: 낡고 해진 시집이다. 표지에는 희미하게 별 문양이 그려져 있다.
+
+* (결과: 텍스트 출력, 이성 -2) [[아무 페이지나 펼쳐 시를 한 수 읽어본다.->choice-book-IP]]
+* (결과: 텍스트 출력) [[페이지 여백에 적힌 메모나 주석이 있는지 살펴본다.->choice-book-IP]]
+* (결과: 텍스트 출력) [[책에서 나는 냄새를 맡아본다.->choice-book-IP]]
+* [[다른 책을 찾아본다.->choice-book-IP]]
+
+:: detail-book-forgotten-rituals [libraryExploration]
+title: '잊혀진 의식과 제물에 관한 소고'
+description: 두꺼운 연구서로, 표지에는 복잡한 기하학적 문양이 음각되어 있다.
+
+* (결과: 텍스트 출력) [[목차를 훑어보며 특정 의식에 대한 내용이 있는지 확인한다.->choice-book-IP]]
+* (결과: 텍스트 출력, 이성 -4) [[책 속의 삽화나 도해를 집중적으로 살펴본다.->choice-book-IP]]
+* (결과: 텍스트 출력) [[가장 중요해 보이는 페이지 하나를 몰래 찢어 가진다. (아이템 획득 시도)->choice-book-IP]]
+* [[다른 책을 찾아본다.->choice-book-IP]]
+
+:: detail-book-kingsport-history [libraryExploration]
+title: '킹스포트 항구 이면사'
+description: 지역 역사서인 듯 하지만, 표지부터 음산한 분위기를 풍긴다. "이면사"라는 부제가 마음에 걸린다.
+
+* (결과: 텍스트 출력) [[책 내용 중 기이한 사건이나 실종 관련 기록을 찾아본다.->choice-book-IP]]
+* (결과: 텍스트 출력) [[책에 언급된 특정 장소나 지도가 있는지 확인한다.->choice-book-IP]]
+* (결과: 텍스트 출력) [[내가 알고 있는 사실이나 다른 단서와 이 책의 내용을 비교 분석한다.->choice-book-IP]]
+* [[다른 책을 찾아본다.->choice-book-IP]]
+
+:: detail-book-lunar-dialect [libraryExploration]
+title: '월족 언어 해독 시론'
+description: 매우 전문적인 언어학 서적으로 보이지만, "월족"이라는 단어가 심상치 않다.
+
+* (결과: 텍스트 출력) [[책에 설명된 내용을 바탕으로, 이전에 보았던 다른 기호나 문자를 해독 시도해본다.->choice-book-IP]]
+* (결과: 텍스트 출력, 이성 -3) [[월족 언어의 발음이나 음성적 특징에 대한 설명을 찾아본다.->choice-book-IP]]
+* (결과: 텍스트 출력) [[언어와 관련된 월족의 문화나 신화에 대한 정보가 있는지 찾아본다.->choice-book-IP]]
+* [[다른 책을 찾아본다.->choice-book-IP]]
+
+:: detail-book-necronomicon [libraryExploration]
+title: '네크로노미콘'
+description: 단순히 오래된 책이라고 하기에는 너무나도 강력한 사악함과 금단의 기운이 느껴지는 책이다. 표지를 만지는 것조차 꺼려진다. 이것이 바로 미친 아랍인 압둘 알하자드가 저술했다는 전설의 마도서인가...
+
+* (결과: 텍스트 출력, 이성 -25) [[공포를 억누르고 책을 펼쳐 그 내용을 확인한다. (극도의 위험 감수)->choice-book-IP]]
+* (결과: 텍스트 출력, 이성 -15) [[GateKeeper나 이 저택의 비밀과 관련된 특정 주문이나 정보를 찾아보려 시도한다.->choice-book-IP]]
+* (결과: 텍스트 출력, 이성 -5) [[이 책은 너무 위험하다. 즉시 덮고 멀리한다.->choice-book-IP]]
+* [[다른 책을 찾아본다.->choice-book-IP]]
+
+
+/% -------------------------------------------------- %/
+/% --- From: FirstHalf08.tsx (책상 방) --- %/
+/% -------------------------------------------------- %/
+
+:: start-table-observation [tableInvestigation]
+title: 책상 조사 시작
+description: 낡은 나무 책상 위는 온통 기괴한 물건들로 가득하다. 유리병 속의 섬뜩한 생물, 수상한 내용이 적힌 듯한 펼쳐진 책과 흩어진 종이들, 그리고 굳게 닫힌 서랍까지... 무엇부터 조사해야 할까? 모든 것을 다 살펴볼 시간은 없을 것 같다.
+* [[조사를 시작한다...->choice-table-IP]]
+* (결과: 텍스트 출력) [[불길하다. 이 책상은 무시한다.]] (-> 다이얼로그 종료)
+
+:: choice-table-IP [tableInvestigation]
+title: 어떤 것을 조사할까?
+(캐릭터 상태에 따라 내용 변경)
+* [[유리병 속의 기괴한 생물을 조사한다.->detail-jar-investigation]]
+* [[펼쳐진 낡은 책을 조사한다.->detail-book-investigation]]
+* [[흩어진 종이들을 조사한다.->detail-papers-investigation]]
+* [[책상 서랍을 조사한다.->detail-drawer-investigation]]
+* (결과: 텍스트 출력) [[이만하면 됐다. 테이블 조사를 마친다.]] (-> 다이얼로그 종료)
+
+:: detail-jar-investigation [tableInvestigation]
+title: 병 속의 생물
+description: 끈적한 액체 속에 잠긴 생물은 형언하기 어려운 모습이다. 미세하게 꿈틀거리는 것 같기도 하다.
+* (결과: 텍스트 출력, 이성 -3) [[병을 조심스럽게 들어 빛에 비춰보며 생물의 세부 형태를 관찰한다.->choice-table-IP]]
+* (결과: 텍스트 출력, 이성 -10) [[병마개를 조심스럽게 열어보려 시도하거나, 내용물의 냄새를 맡아본다. (위험 감수)->choice-table-IP]]
+* [[더 이상 건드리지 않고 돌아간다.->choice-table-IP]]
+
+:: detail-book-investigation [tableInvestigation]
+title: 낡은 책
+description: 가죽 표지의 책은 수없이 많은 손길을 탄 듯 낡았고, 펼쳐진 페이지에는 알아보기 힘든 고대 문자와 기괴한 삽화가 가득하다.
+* (결과: 텍스트 출력, 이성 -5) [[펼쳐진 페이지의 본문 내용을 자세히 읽어본다.->choice-table-IP]]
+* (결과: 텍스트 출력) [[책 전체를 꼼꼼히 살펴보며 다른 중요한 부분(밑줄, 접힌 페이지, 숨겨진 메모 등)이 있는지 확인한다.->choice-table-IP]]
+* [[더 이상 읽지 않고 돌아간다.->choice-table-IP]]
+
+:: detail-papers-investigation [tableInvestigation]
+title: 흩어진 종이들
+description: 양피지로 보이는 종이 조각들이 책상 위에 어지럽게 흩어져 있다. 무언가를 급하게 적은 듯한 필체다.
+* (결과: 텍스트 출력) [[가장 위에 놓인 종이 한 장의 내용을 빠르게 확인한다.->choice-table-IP]]
+* (결과: 텍스트 출력, 이성 -2) [[흩어진 종이들을 모아 순서를 맞춰보거나, 내용을 종합적으로 분석한다.->choice-table-IP]]
+* [[종이들은 무시하고 돌아간다.->choice-table-IP]]
+
+:: detail-drawer-investigation [tableInvestigation]
+title: 책상 서랍
+description: 책상에는 두 개의 서랍이 있다. 어느 쪽을 열어볼까, 아니면 좀 더 다른 방법을 찾아볼까?
+* (결과: 텍스트 출력) [[왼쪽 서랍을 열어 내부를 꼼꼼히 살펴본다.->choice-table-IP]]
+* (결과: 텍스트 출력, 이성 -3) [[오른쪽 서랍을 열어 내부를 꼼꼼히 살펴본다.->choice-table-IP]]
+* (결과: 텍스트 출력, 이성 -5) [[서랍 안쪽이나 바닥에 비밀 공간이 있는지 정밀하게 조사한다.->choice-table-IP]]
+* [[서랍은 그대로 두고 돌아간다.->choice-table-IP]]
+
+
+/% -------------------------------------------------- %/
+/% --- 공통 상호작용 (Common Interactions) --- %/
+/% -------------------------------------------------- %/
+
+:: doorInteraction [doorInteraction]
+title: 문을 열어본다.
+description: 문을 열어본다.
+* (결과: 다음 씬으로) [[문을 열고 다음 방으로 이동한다.]] (-> 다이얼로그 종료)
+* [[문을 열지 않는다.]] (-> 다이얼로그 종료)
+
+:: ask-open-childs-room-exit [doorInteraction]
+title: 방 나가기
+description: 이 아이의 방에서 나가시겠습니까?
+* (결과: 다음 씬으로) [[방에서 나간다.]] (-> 다이얼로그 종료)
+* [[아직 방에 더 머무른다.]] (-> 다이얼로그 종료)
+
+:: ask-open-fanatic-room-exit [doorInteraction]
+title: 방 나가기
+description: 이 위험한 인물과 더 이상 엮이고 싶지 않다.
+* (결과: 다음 씬으로) [[방에서 나간다.]] (-> 다이얼로그 종료)
+* [[아직 그에게서 더 알아낼 것이 있다.]] (-> 다이얼로그 종료)
+
+:: ask-open-trash-room-exit [doorInteraction]
+title: 방 나가기
+description: 이 역겨운 방에서 나가시겠습니까?
+* (결과: 다음 씬으로) [[방에서 나간다.]] (-> 다이얼로그 종료)
+* [[아직 조사할 것이 남았다.]] (-> 다이얼로그 종료)

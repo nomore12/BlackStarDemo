@@ -85,6 +85,11 @@ export interface DecreaseSanityOutcomePayload {
   reason?: string; // (선택적) 정신력 감소 이유 로그용
 }
 
+export interface DecreaseHitPointsOutcomePayload {
+  amount: number; // 감소시킬 체력의 양 (양수로 전달하고, 처리 시 음수로 변환)
+  reason?: string; // (선택적) 체력 감소 이유 로그용
+}
+
 export interface DecreaseInvestigationPointsOutcomePayload {
   amount: number; // 감소시킬 조사 포인트의 양 (양수로 전달하고, 처리 시 음수로 변환)
   reason?: string; // (선택적) 조사 포인트 감소 이유 로그용
@@ -103,6 +108,7 @@ export type OutcomeType =
   | 'openModal'
   | 'customEffect'
   | 'decreaseSanity'
+  | 'decreaseHitPoints'
   | 'decreaseInvestigationPoints';
 // 이전 RoomEventsType.ts에 있던 타입들:
 // | 'playerDies'
@@ -197,6 +203,15 @@ export type RoomOutcome =
   | {
       type: 'decreaseSanity';
       payload: DecreaseSanityOutcomePayload;
+      condition?: (
+        characterState: CharacterState | null | undefined,
+        gameState: CombinedGameAndSceneState,
+        skillCheckResult?: SkillCheckResult
+      ) => boolean;
+    }
+  | {
+      type: 'decreaseHitPoints';
+      payload: DecreaseHitPointsOutcomePayload;
       condition?: (
         characterState: CharacterState | null | undefined,
         gameState: CombinedGameAndSceneState,

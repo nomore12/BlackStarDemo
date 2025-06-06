@@ -17,6 +17,7 @@ import type { SceneStoreState } from '../store/sceneStore';
 interface OutcomeHandlerDependencies {
   applyPlayerEffect: GameState['applyPlayerEffect'];
   changeCharacterSanity: GameState['changeCharacterSanity'];
+  changeCharacterHitPoints: GameState['changeCharacterHitPoints'];
   changeCharacterInvestigationPoints: GameState['changeCharacterInvestigationPoints'];
   addItem: GameState['addItem'];
   getNextSceneUrl: SceneStoreState['getNextSceneUrl'];
@@ -56,6 +57,10 @@ const outcomeHandlers: OutcomeHandlersMap = {
   decreaseSanity: (payload, dependencies) => {
     const { changeCharacterSanity } = dependencies;
     changeCharacterSanity(payload.amount, payload.reason);
+  },
+  decreaseHitPoints: (payload, dependencies) => {
+    const { changeCharacterHitPoints } = dependencies;
+    changeCharacterHitPoints(-payload.amount, payload.reason);
   },
   decreaseInvestigationPoints: (payload, dependencies) => {
     const { changeCharacterInvestigationPoints } = dependencies;

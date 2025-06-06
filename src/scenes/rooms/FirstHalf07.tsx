@@ -540,6 +540,7 @@ const FirstHalf07: React.FC = () => {
         onCloseDialog={handleCloseDialog}
         applyPlayerEffect={gameStoreInstance.applyPlayerEffect}
         changeCharacterSanity={gameStoreInstance.changeCharacterSanity}
+        changeCharacterHitPoints={gameStoreInstance.changeCharacterHitPoints}
         changeCharacterInvestigationPoints={
           gameStoreInstance.changeCharacterInvestigationPoints
         }

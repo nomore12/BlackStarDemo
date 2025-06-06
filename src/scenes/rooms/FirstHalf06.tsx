@@ -56,7 +56,7 @@ const FirstHalf06: React.FC = () => {
               {
                 id: 'doll_choice_observe_appearance',
                 text: '인형의 겉모습과 주변을 살펴본다. [조사 포인트 1]',
-                investigationPointsRequired: 1,
+                investigationPoints: 1,
                 outcomes: [
                   {
                     type: 'decreaseInvestigationPoints',
@@ -68,7 +68,7 @@ const FirstHalf06: React.FC = () => {
               {
                 id: 'doll_choice_touch_and_check',
                 text: '인형을 직접 만져보고, 옷이나 숨겨진 부분을 확인한다. [조사 포인트 2]',
-                investigationPointsRequired: 2,
+                investigationPoints: 2,
                 outcomes: [
                   {
                     type: 'decreaseInvestigationPoints',
@@ -80,7 +80,7 @@ const FirstHalf06: React.FC = () => {
               {
                 id: 'doll_choice_stare_and_talk',
                 text: '인형의 눈을 똑바로 쳐다보며 말을 걸어본다. [조사 포인트 3]',
-                investigationPointsRequired: 3,
+                investigationPoints: 3,
                 outcomes: [
                   {
                     type: 'decreaseInvestigationPoints',
@@ -248,7 +248,7 @@ const FirstHalf06: React.FC = () => {
               {
                 id: 'drawing_choice_identify_shapes',
                 text: '그림의 전체적인 형태와 사용된 색깔을 파악한다. [조사 포인트 1]',
-                investigationPointsRequired: 1,
+                investigationPoints: 1,
                 outcomes: [
                   {
                     type: 'decreaseInvestigationPoints',
@@ -260,7 +260,7 @@ const FirstHalf06: React.FC = () => {
               {
                 id: 'drawing_choice_focus_on_parts',
                 text: '그림 중 특정 부분(예: 문, 촉수, 눈)을 집중적으로 관찰한다. [조사 포인트 2]',
-                investigationPointsRequired: 2,
+                investigationPoints: 2,
                 outcomes: [
                   {
                     type: 'decreaseInvestigationPoints',
@@ -272,7 +272,7 @@ const FirstHalf06: React.FC = () => {
               {
                 id: 'drawing_choice_check_backside',
                 text: '그림 뒷면이나 액자틀에 다른 단서가 있는지 확인한다. [조사 포인트 2]',
-                investigationPointsRequired: 2,
+                investigationPoints: 2,
                 outcomes: [
                   {
                     type: 'decreaseInvestigationPoints',
@@ -504,12 +504,24 @@ const FirstHalf06: React.FC = () => {
           alt="gate"
         />
       </Box>
+      <Box
+        sx={{
+          position: 'absolute',
+          width: '187px',
+          height: '310px',
+          top: 130,
+          left: 304,
+          zIndex: 1,
+        }}
+        onClick={handleDoorClick}
+      ></Box>
       <RoomDialogController
         dialogSequences={roomDialogs}
         activeDialogId={activeDialogId}
         onCloseDialog={handleCloseDialog}
         applyPlayerEffect={gameStoreInstance.applyPlayerEffect}
         changeCharacterSanity={gameStoreInstance.changeCharacterSanity}
+        changeCharacterHitPoints={gameStoreInstance.changeCharacterHitPoints}
         changeCharacterInvestigationPoints={
           gameStoreInstance.changeCharacterInvestigationPoints
         }

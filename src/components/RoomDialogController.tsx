@@ -15,6 +15,11 @@ interface RoomDialogControllerProps {
     reason?: string,
     characterId?: string
   ) => void;
+  changeCharacterHitPoints: (
+    amount: number,
+    reason?: string,
+    characterId?: string
+  ) => void;
   changeCharacterInvestigationPoints: (
     amount: number,
     reason?: string,
@@ -33,6 +38,7 @@ const RoomDialogController: React.FC<RoomDialogControllerProps> = ({
   onCloseDialog,
   applyPlayerEffect,
   changeCharacterSanity,
+  changeCharacterHitPoints,
   changeCharacterInvestigationPoints,
   addItem,
   getNextSceneUrl,
@@ -62,6 +68,7 @@ const RoomDialogController: React.FC<RoomDialogControllerProps> = ({
     onDialogShouldCloseByAction: onCloseDialog,
     applyPlayerEffect,
     changeCharacterSanity,
+    changeCharacterHitPoints,
     changeCharacterInvestigationPoints,
     addItem,
     getNextSceneUrl,

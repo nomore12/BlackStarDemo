@@ -178,6 +178,7 @@ export interface GameState {
   changeDoomGauge: (delta: number) => void;
   changeCharacterHp: (delta: number) => void;
   changeCharacterSanity: (delta: number, reason?: string) => void;
+  changeCharacterHitPoints: (delta: number, reason?: string) => void;
   changeCharacterActionPoints: (delta: number) => void;
   changeCharacterReactionPoints: (delta: number) => void;
   changeCharacterInvestigationPoints: (delta: number) => void;
@@ -286,6 +287,24 @@ export const useGameStore = create<GameState>()(
                 selectedCharacter: {
                   ...state.selectedCharacter,
                   currentSanity: newSanity,
+                },
+              };
+            }
+            return {};
+          });
+        },
+
+        changeCharacterHitPoints: (delta: number, reason?: string) => {
+          set((state) => {
+            if (state.selectedCharacter) {
+              const newHP = Math.max(
+                0,
+                state.selectedCharacter.currentHP + delta
+              );
+              return {
+                selectedCharacter: {
+                  ...state.selectedCharacter,
+                  currentHP: newHP,
                 },
               };
             }

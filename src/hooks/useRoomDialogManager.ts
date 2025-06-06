@@ -31,6 +31,11 @@ interface UseRoomDialogManagerProps {
     reason?: string,
     characterId?: string
   ) => void;
+  changeCharacterHitPoints: (
+    amount: number,
+    reason?: string,
+    characterId?: string
+  ) => void;
   changeCharacterInvestigationPoints: (
     amount: number,
     reason?: string,
@@ -51,6 +56,7 @@ export const useRoomDialogManager = ({
   onDialogShouldCloseByAction,
   applyPlayerEffect,
   changeCharacterSanity,
+  changeCharacterHitPoints,
   changeCharacterInvestigationPoints,
   addItem,
   getNextSceneUrl,
@@ -154,6 +160,8 @@ export const useRoomDialogManager = ({
             applyPlayerEffect: applyPlayerEffect,
             changeCharacterSanity: (amount: number, reason?: string) =>
               changeCharacterSanity(amount, reason, characterState?.id),
+            changeCharacterHitPoints: (amount: number, reason?: string) =>
+              changeCharacterHitPoints(amount, reason, characterState?.id),
             changeCharacterInvestigationPoints: (amount: number) =>
               changeCharacterInvestigationPoints(
                 amount,

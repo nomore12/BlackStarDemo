@@ -295,12 +295,24 @@ export const useGameStore = create<GameState>()(
         },
 
         changeCharacterHitPoints: (delta: number, reason?: string) => {
+          console.log('changeCharacterHitPoints', delta, reason);
           set((state) => {
             if (state.selectedCharacter) {
               const newHP = Math.max(
                 0,
-                state.selectedCharacter.currentHP + delta
+                Math.min(
+                  state.selectedCharacter.maxHP,
+                  state.selectedCharacter.currentHP + delta
+                )
               );
+              if (delta < 0) {
+                useSnackbarStore.getState().showSnackbar(
+                  `체력이 ${Math.abs(delta)} 만큼 감소했습니다. (${reason})`,
+                  newHP < state.selectedCharacter.maxHP * 0.3
+                    ? 'warning'
+                    : 'info' // 체력이 낮으면 경고
+                );
+              }
               return {
                 selectedCharacter: {
                   ...state.selectedCharacter,

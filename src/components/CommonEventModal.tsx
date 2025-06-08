@@ -106,7 +106,7 @@ const CommonEventModal: React.FC<CommonEventModalProps> = ({
           }
           setIsTyping(false);
         }
-      }, 30);
+      }, 15);
 
       return () => {
         if (typingIntervalRef.current) {

@@ -24,6 +24,7 @@ import {
   SecondHalf07,
   SecondHalf08,
 } from '../scenes/rooms/index';
+import { CenterLobby, LeftLobby, RightLobby } from '../scenes/lobbies/index';
 import IntroductionScene from '../scenes/IntroductionScene';
 
 const AppRoutes: React.FC = () => {
@@ -52,6 +53,9 @@ const AppRoutes: React.FC = () => {
       <Route path="/second-half-06" element={<SecondHalf06 />} />
       <Route path="/second-half-07" element={<SecondHalf07 />} />
       <Route path="/second-half-08" element={<SecondHalf08 />} />
+      <Route path="/center-lobby" element={<CenterLobby />} />
+      <Route path="/left-lobby" element={<LeftLobby />} />
+      <Route path="/right-lobby" element={<RightLobby />} />
       {/* 필요에 따라 다른 라우트들을 여기에 추가합니다. */}
       {/* 예: <Route path="/gameplay" element={<GamePlayScene />} /> */}
       {/* 예: <Route path="*" element={<NotFoundPage />} /> */}
